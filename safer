@@ -1,4 +1,24 @@
 #!/bin/sh
+
+safer_ver=0.0-dev
+
+safer_usage="Usage:
+ $0 [OPTIONS]
+
+Options:
+ -v, --version  Display the current version.
+ -h, --help     Display usage and exit.
+
+Environment:
+ SAFER_DIR      Specify a directory for the scripts. Default .safer ."
+
+SAFER_DIR=${SAFER_DIR:-.safer}
+
 if [ "$#" -eq 0 ]; then
-	PATH=".safer:$PATH" $SHELL
+	PATH="$SAFER_DIR:$PATH" ${SHELL:-sh}
+else
+	case " $@ " in
+		*" -v "*|*" --version "*) echo $safer_ver && exit ;;
+		*" -h "*|*" --help "*) echo "$safer_usage" && exit ;;
+	esac
 fi

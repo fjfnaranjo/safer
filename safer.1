@@ -1,0 +1,27 @@
+.TH SAFER 1
+.SH NAME
+safer \- run project tools in containers using proxy scripts
+.SH SYNOPSIS
+.B safer
+[OPTIONS]
+.SH DESCRIPTION
+.B safer
+is a command to create scripts to run dev tools using container
+runtimes. Running them like this isolates the rest of the developer
+system. The script mounts the project files (and other, if needed) in
+the same paths as the host to allow coherent feedback when this tools
+report file paths.
+
+The commands are created in the .safer directory. You can add this
+directory to your PATH or you can run
+.B safer
+without any option to run a sub-shell with a modified PATH.
+.SH OPTIONS
+.TP
+.BR \-v ", " \-\-version
+Display the current version.
+.BR \-h ", " \-\-help
+Display usage and exit.
+.SH ENVIRONMENT
+.B SAFER_DIR
+Create the scripts in this directory (default `.safer`).
