@@ -1,0 +1,22 @@
+---
+name: Attach release assets
+on:
+  release:
+    types: [created]
+jobs:
+  attach-assets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Replace version in command source
+        run: |
+          sed -i "s/0.0-dev/${GITHUB_REF_NAME#release-}/g" safer
+      - name: Upload asset to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            safer
+            safer.1
