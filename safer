@@ -69,8 +69,8 @@ fi
 shift 2
 
 write_script () {
-	mkdir -p "$2"
-	script_file="$2/$3"
+	script_file=$(mktemp)
+	script_dest="$2/$3"
 	printf '#!/bin/sh\n' > "$script_file"
 	printf '%s run --rm -i \\\n' "$1" >> "$script_file"
 	printf '\t%s \\\n' "$safer_image" >> "$script_file"
@@ -80,6 +80,8 @@ write_script () {
 	shift 5
 	for arg in "$@"; do printf ' \\\n\t-v "%s":"%s"' "$arg" "$arg" >> "$script_file"; done
 	printf ' \\\n\t"$@"\n' >> "$script_file"
+	install -D "$script_file" "$script_dest"
+	rm "$script_file"
 }
 
 # TODO: Fill runtimne
