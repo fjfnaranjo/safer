@@ -4,6 +4,8 @@
 # TODO: auto-image from cmd name
 # TODO: safer-images if not image
 
+# Section 1: Init safer and read args/env
+
 safer_ver=0.0-dev
 
 safer_usage="Usage:
@@ -85,6 +87,8 @@ fi
 if [ -z "$safer_runtime_args" ] && [ "$safer_runtime_cmd" = "docker" ]; then
 	safer_runtime_args='--user "$(id -u):$(id -g)"'
 fi
+
+# Section 2: Writing the script
 
 script_dest="$safer_dir/$safer_cmd"
 script_file=$(mktemp)
