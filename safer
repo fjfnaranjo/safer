@@ -75,7 +75,8 @@ write_script () {
 	printf '%s -rm -i \\\n' "$1" >> "$script_file"
 	printf '\t%s \\\n' "$safer_image" >> "$script_file"
 	[ -n "$5" ] && printf '\t--entrypoint %s \\\n' "$5" >> "$script_file"
-	printf '\t-v "%s":"%s"' "$(pwd)" "$(pwd)" >> "$script_file"
+	printf '\t-v "%s":"%s" \\\n' "$(pwd)" "$(pwd)" >> "$script_file"
+	printf '\t-w "%s"' "$(pwd)" >> "$script_file"
 	shift 5
 	for arg in "$@"; do printf ' \\\n\t-v "%s":"%s"' "$arg" "$arg" >> "$script_file"; done
 	printf ' \\\n\t"\$@"\n' >> "$script_file"
