@@ -54,6 +54,30 @@
 					between host software and project-specific tooling.
 				</li>
 			</ul>
+			<section class="pt-4 space-y-6">
+				<h2 class="text-3xl font-bold text-white text-center">
+					Installation
+				</h2>
+				<h2 class="text-2xl font-bold text-white">
+					Linux
+				</h2>
+				<p>
+					Download <strong class="text-white">safer</strong>:
+				</p>
+<pre class="bg-black/30 rounded-lg overflow-x-auto"><code>cd /tmp
+curl -Lo safer https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc1/safer
+curl -Lo safer.1 https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc1/safer.1</code></pre>
+				<p>
+					Install the files for your user (if you have <em>~/.local/bin</em> in your <strong>PATH</strong>):
+				</p>
+<pre class="bg-black/30 rounded-lg overflow-x-auto"><code>install -Dm755 safer ~/.local/bin/safer
+install -Dm644 safer.1 ~/.local/share/man/man1/safer.1</code></pre>
+				<p>
+					Or install them system-wide:
+				</p>
+<pre class="bg-black/30 rounded-lg overflow-x-auto"><code>sudo install -Dm755 safer /usr/local/bin/safer
+sudo install -Dm644 safer.1 /usr/local/share/man/man1/safer.1</code></pre>
+			</section>
 			<div class="pt-8 flex justify-center">
 				<a
 					href="https://github.com/fjfnaranjo/safer#readme"

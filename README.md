@@ -28,3 +28,26 @@ project specific dev tools.
 The commands are created in the `.safer` directory. You can add this
 directory to your PATH or you can run `safer` without any option to run
 a sub-shell with a modified PATH.
+## Installing safer
+### Linux
+Download safer:
+
+```
+cd /tmp
+curl -Lo safer https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc1/safer
+curl -Lo safer.1 https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc1/safer.1
+```
+
+Install the files for your user (if you have `~/.local/bin` in your **PATH**):
+
+```
+install -Dm755 safer ~/.local/bin/safer
+install -Dm644 safer.1 ~/.local/share/man/man1/safer.1
+```
+
+Or install them in the system:
+
+```
+sudo install -Dm755 safer /usr/local/bin/safer
+sudo install -Dm644 safer.1 /usr/local/share/man/man1/safer.1
+```
