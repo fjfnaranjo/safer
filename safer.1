@@ -25,6 +25,14 @@ Tool entrypoint in the image.
 .BR \-d
 Directory for the scripts. Default: .safer .
 .TP
+.BR \-R
+Runtime cli command. Override podman/docker detection.
+.TP
+.BR \-X
+Runtime extra args.
+.br
+Docker default: '--user "$(id -u):$(id -g)"'.
+.TP
 .BR \-v ", " \-\-version
 Display the current version.
 .TP
@@ -34,6 +42,14 @@ Display usage and exit.
 .TP
 .B SAFER_DIR
 Directory for the scripts. Default: .safer .
+.TP
+.B SAFER_RT_CMD
+Runtime cli command. Override podman/docker detection.
+.TP
+.B SAFER_RT_ARGS
+Runtime extra args.
+.br
+Docker default: '--user "$(id -u):$(id -g)"'.
 .TP
 .B SHELL
 Shell used to run the sub-shell when not args are specified.

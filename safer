@@ -14,13 +14,15 @@ Arguments:
  image       Image where the tool executable resides.
  dir         Extra directories to mount in the container.
 
+For the full list of Options and Environment Vars, see the man page.
+
 Options:
  -e             Tool entrypoint in the image.
  -d             Directory for the scripts. Default: .safer .
  -v, --version  Display the current version.
  -h, --help     Display usage and exit.
 
-Environment:
+Environment Vars:
  SAFER_DIR      Directory for the scripts. Default .safer .
 
 Config files: /etc/safer, ~/.saferrc, .saferrc"
@@ -46,12 +48,16 @@ esac
 safer_cmd=
 safer_image=
 safer_entryporint=
+safer_runtime_cmd="$SAFER_RT_CMD"
+safer_runtime_args="$SAFER_RT_ARGS"
 
-while getopts vhe:d: opt
+while getopts vhe:d:R:X: opt
 do
 	case $opt in
 		e) safer_entryporint=$OPTARG ;;
 		d) safer_dir=$OPTARG ;;
+		R) safer_runtime_cmd=$OPTARG ;;
+		X) safer_runtime_args=$OPTARG ;;
 		*) ;;
 	esac
 done
@@ -68,23 +74,57 @@ fi
 
 shift 2
 
-write_script () {
-	script_dest="$2/$3"
-	script_image="$4"
+if [ -z "$safer_runtime_cmd" ]; then
+	if command -v podman >/dev/null 2>&1; then
+		safer_runtime_cmd=podman
+	elif command -v docker >/dev/null 2>&1; then
+		safer_runtime_cmd=docker
+	fi
+fi
+
+if [ -z "$safer_runtime_args" ] && [ "$safer_runtime_cmd" = "docker" ]; then
+	safer_runtime_args='--user "$(id -u):$(id -g)"'
+fi
+
+write_script() {
+	runtime_cmd=$1
+	runtime_args=$2
+	dest_dir=$3
+	dest_name=$4
+	image=$5
+	entrypoint=$6
+	shift 6
+
+	script_dest="$dest_dir/$dest_name"
 	script_file=$(mktemp)
-	printf '#!/bin/sh\n' > "$script_file"
-	printf '%s run --rm -i \\\n' "$1" >> "$script_file"
-	[ -n "$5" ] && printf '\t--entrypoint %s \\\n' "$5" >> "$script_file"
-	printf '\t-v "%s":"%s" \\\n' "$(pwd)" "$(pwd)" >> "$script_file"
-	printf '\t-w "%s"' "$(pwd)" >> "$script_file"
-	shift 5
-	for arg in "$@"; do printf ' \\\n\t-v "%s":"%s"' "$arg" "$arg" >> "$script_file"; done
-	printf ' \\\n\t%s "$@"\n' "$script_image" >> "$script_file"
+	cwd=$(pwd)
+
+	{
+		printf '#!/bin/sh\n'
+
+		printf '%s run --rm -i \\\n' "$runtime_cmd"
+
+		if [ -n "$runtime_args" ]; then
+			printf '\t%s \\\n' "$runtime_args"
+		fi
+
+		if [ -n "$entrypoint" ]; then
+			printf '\t--entrypoint %s \\\n' "$entrypoint"
+		fi
+
+		printf '\t-v "%s":"%s" \\\n' "$cwd" "$cwd"
+		printf '\t-w "%s"' "$cwd"
+
+		for arg in "$@"; do
+			printf ' \\\n\t-v "%s":"%s"' "$arg" "$arg"
+		done
+
+		printf ' \\\n\t%s "$@"\n' "$image"
+
+	} > "$script_file"
+
 	install -D "$script_file" "$script_dest"
-	rm "$script_file"
+	rm -f "$script_file"
 }
 
-# TODO: Fill runtimne
-safer_runtime="podman"
-
-write_script "$safer_runtime" "$safer_dir" "$safer_cmd" "$safer_image" "$safer_entryporint" "$@"
+write_script "$safer_runtime_cmd" "$safer_runtime_args" "$safer_dir" "$safer_cmd" "$safer_image" "$safer_entryporint" "$@"
