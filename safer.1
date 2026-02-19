@@ -3,25 +3,41 @@
 safer \- run project tools in containers using proxy scripts
 .SH SYNOPSIS
 .B safer
-[OPTIONS]
+.br
+.B safer
+[OPTIONS] <CMD> <IMAGE> [DIR...]
 .SH DESCRIPTION
 .B safer
-is a command to create scripts to run dev tools using container
-runtimes. Running them like this isolates the rest of the developer
-system. The script mounts the project files (and other, if needed) in
-the same paths as the host to allow coherent feedback when this tools
-report file paths.
-
+creates a CMD script to run a dev tool using a container IMAGE.
+.P
+The current directory, and any extra DIR specified, are mounted in the
+container using the same paths as the mount points.
+.P
 The commands are created in the .safer directory. You can add this
 directory to your PATH or you can run
 .B safer
-without any option to run a sub-shell with a modified PATH.
+without any option to run a SHELL with a modified PATH.
 .SH OPTIONS
+.TP
+.BR \-e
+Tool entrypoint in the image.
+.TP
+.BR \-d
+Directory for the scripts. Default: .safer .
 .TP
 .BR \-v ", " \-\-version
 Display the current version.
+.TP
 .BR \-h ", " \-\-help
 Display usage and exit.
 .SH ENVIRONMENT
+.TP
 .B SAFER_DIR
-Create the scripts in this directory (default `.safer`).
+Directory for the scripts. Default: .safer .
+.TP
+.B SHELL
+Shell used to run the sub-shell when not args are specified.
+.SH FILES
+.TP
+.BR /etc/safer ", "~/.saferrc ", "~/.saferrc
+This files are sourced by safer.

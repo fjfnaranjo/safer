@@ -18,12 +18,53 @@
 		</svg>
 		<h1 class="text-5xl font-bold mb-4">safer</h1>
 		<p class="text-xl max-w-xl text-center">
-			Run your dev tools in safer containers.
+			 Protect your dev box from supply-chain attacks with safer.
 		</p>
-		<a href="https://github.com/fjfnaranjo/safer#readme" target="_blank" class="cta mt-8 px-8 py-3 text-white rounded-lg font-semibold shadow-lg">
-			View README
-		</a>
 	</header>
+	<main class="flex flex-col items-center px-6 py-5">
+		<div class="w-full max-w-3xl space-y-6 text-lg leading-relaxed text-gray-200">
+			<p>
+				<strong class="text-white">safer</strong> creates scripts to run dev tools using
+				container runtimes.
+			</p>
+			<p>
+				The scripts mount project files (and other resources if needed) in the
+				same paths as the host, allowing coherent feedback when tools report
+				file paths. This isolates the rest of the developer system.
+			</p>
+			<p>
+				Host dev tools (Neovim, diagnostics, AI agents…) auto-detect these
+				scripts as the actual tools and interpret output as if it were running
+				natively — particularly useful for LSPs.
+			</p>
+			<p class="pt-4 text-xl font-semibold text-white">
+				Using this technique, you get:
+			</p>
+			<ul class="list-disc list-inside space-y-3 pl-2">
+				<li>
+					<strong class="text-white">Host files isolation</strong> — only explicitly shared
+					project files are visible inside the container.
+				</li>
+				<li>
+					<strong class="text-white">Reproducible tool chains</strong> — exact tool versions
+					per project, independent of host OS or platform.
+				</li>
+				<li>
+					<strong class="text-white">Cleaner developer systems</strong> — clear separation
+					between host software and project-specific tooling.
+				</li>
+			</ul>
+			<div class="pt-8 flex justify-center">
+				<a
+					href="https://github.com/fjfnaranjo/safer#readme"
+					target="_blank"
+					class="cta px-10 py-4 text-white rounded-lg font-semibold shadow-xl transition-transform hover:scale-105"
+				>
+					View README
+				</a>
+			</div>
+		</div>
+	</main>
 	<footer class="mt-auto py-8 text-center text-sm">
 		&copy; 2026 safer • <a href="https://github.com/fjfnaranjo/safer" target="_blank" class="underline">GitHub Repository</a>
 	</footer>

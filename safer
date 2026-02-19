@@ -1,24 +1,87 @@
 #!/bin/sh
 
+# TODO: persistence
+# TODO: auto-image from cmd name
+# TODO: safer-images if not image
+
 safer_ver=0.0-dev
 
 safer_usage="Usage:
- $0 [OPTIONS]
+$0 [[OPTIONS] [<cmd> <image> [dir...]]]
+
+Arguments:
+ cmd         Name of the tool executable.
+ image       Image where the tool executable resides.
+ dir         Extra directories to mount in the container.
 
 Options:
+ -e             Tool entrypoint in the image.
+ -d             Directory for the scripts. Default: .safer .
  -v, --version  Display the current version.
  -h, --help     Display usage and exit.
 
 Environment:
- SAFER_DIR      Specify a directory for the scripts. Default .safer ."
+ SAFER_DIR      Directory for the scripts. Default .safer .
 
-SAFER_DIR=${SAFER_DIR:-.safer}
+Config files: /etc/safer, ~/.saferrc, .saferrc"
+
+[ -e "/etc/safer" ] && . "/etc/safer"
+[ -e "$HOME/.saferrc" ] && . "$HOME/.saferrc"
+[ -e ".saferrc" ] && . ".saferrc"
+
+safer_dir=${SAFER_DIR:-.safer}
 
 if [ "$#" -eq 0 ]; then
-	PATH="$SAFER_DIR:$PATH" ${SHELL:-sh}
-else
-	case " $@ " in
-		*" -v "*|*" --version "*) echo $safer_ver && exit ;;
-		*" -h "*|*" --help "*) echo "$safer_usage" && exit ;;
+	case ":$PATH:" in
+		*":$safer_dir:"*) exit ;;
+		*) PATH="$safer_dir:$PATH" ${SHELL:-sh} ;;
 	esac
 fi
+
+case " $@ " in
+	*" -v "*|*" --version "*) echo $safer_ver && exit ;;
+	*" -h "*|*" --help "*) echo "$safer_usage" && exit ;;
+esac
+
+safer_cmd=
+safer_image=
+safer_entryporint=
+
+while getopts vhe:d: opt
+do
+	case $opt in
+		e) safer_entryporint=$OPTARG ;;
+		d) safer_dir=$OPTARG ;;
+		*) ;;
+	esac
+done
+
+shift $((OPTIND - 1))
+
+[ -z "$safer_cmd" ] && safer_cmd="$1"
+[ -z "$safer_image" ] && safer_image="$2"
+
+if [ -z "$safer_cmd" ] || [ -z "$safer_image" ]; then
+	echo "$safer_usage"
+	exit
+fi
+
+shift 2
+
+write_script () {
+	mkdir -p "$2"
+	script_file="$2/$3"
+	printf '#!/bin/sh\n' > "$script_file"
+	printf '%s -rm -i \\\n' "$1" >> "$script_file"
+	printf '\t%s \\\n' "$safer_image" >> "$script_file"
+	[ -n "$5" ] && printf '\t--entrypoint %s \\\n' "$5" >> "$script_file"
+	printf '\t-v "%s":"%s"' "$(pwd)" "$(pwd)" >> "$script_file"
+	shift 5
+	for arg in "$@"; do printf ' \\\n\t-v "%s":"%s"' "$arg" "$arg" >> "$script_file"; done
+	printf ' \\\n\t"\$@"\n' >> "$script_file"
+}
+
+# TODO: Fill runtimne
+safer_runtime="podman"
+
+write_script "$safer_runtime" "$safer_dir" "$safer_cmd" "$safer_image" "$safer_entryporint" "$@"
