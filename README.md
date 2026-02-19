@@ -51,3 +51,10 @@ Or install them in the system:
 sudo install -Dm755 safer /usr/local/bin/safer
 sudo install -Dm644 safer.1 /usr/local/share/man/man1/safer.1
 ```
+### MacOS
+Use Homebrew:
+
+```
+brew tap fjfnaranjo/safer
+brew install safer
+```
