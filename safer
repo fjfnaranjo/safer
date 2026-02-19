@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# TODO: opening ports
 # TODO: persistence
 # TODO: auto-image from cmd name
 # TODO: safer-images if not image
