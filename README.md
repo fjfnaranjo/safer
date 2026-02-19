@@ -34,8 +34,8 @@ Download safer:
 
 ```
 cd /tmp
-curl -Lo safer https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc1/safer
-curl -Lo safer.1 https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc1/safer.1
+curl -Lo safer https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc2/safer
+curl -Lo safer.1 https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc2/safer.1
 ```
 
 Install the files for your user (if you have `~/.local/bin` in your **PATH**):
