@@ -34,7 +34,7 @@ safer_dir=${SAFER_DIR:-.safer}
 if [ "$#" -eq 0 ]; then
 	case ":$PATH:" in
 		*":$safer_dir:"*) exit ;;
-		*) PATH="$safer_dir:$PATH" ${SHELL:-sh} ;;
+		*) PATH="$safer_dir:$PATH" ${SHELL:-sh} && exit ;;
 	esac
 fi
 
