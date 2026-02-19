@@ -86,45 +86,33 @@ if [ -z "$safer_runtime_args" ] && [ "$safer_runtime_cmd" = "docker" ]; then
 	safer_runtime_args='--user "$(id -u):$(id -g)"'
 fi
 
-write_script() {
-	runtime_cmd=$1
-	runtime_args=$2
-	dest_dir=$3
-	dest_name=$4
-	image=$5
-	entrypoint=$6
-	shift 6
+script_dest="$safer_dir/$safer_cmd"
+script_file=$(mktemp)
+cwd=$(pwd)
 
-	script_dest="$dest_dir/$dest_name"
-	script_file=$(mktemp)
-	cwd=$(pwd)
+{
+	printf '#!/bin/sh\n'
 
-	{
-		printf '#!/bin/sh\n'
+	printf '%s run --rm -i \\\n' "$safer_runtime_cmd"
 
-		printf '%s run --rm -i \\\n' "$runtime_cmd"
+	if [ -n "$safer_runtime_args" ]; then
+		printf '\t%s \\\n' "$safer_runtime_args"
+	fi
 
-		if [ -n "$runtime_args" ]; then
-			printf '\t%s \\\n' "$runtime_args"
-		fi
+	if [ -n "$safer_entryporint" ]; then
+		printf '\t--entrypoint "%s" \\\n' "$safer_entryporint"
+	fi
 
-		if [ -n "$entrypoint" ]; then
-			printf '\t--entrypoint %s \\\n' "$entrypoint"
-		fi
+	printf '\t-v "%s":"%s" \\\n' "$cwd" "$cwd"
+	printf '\t-w "%s"' "$cwd"
 
-		printf '\t-v "%s":"%s" \\\n' "$cwd" "$cwd"
-		printf '\t-w "%s"' "$cwd"
+	for arg in "$@"; do
+		printf ' \\\n\t-v "%s":"%s"' "$arg" "$arg"
+	done
 
-		for arg in "$@"; do
-			printf ' \\\n\t-v "%s":"%s"' "$arg" "$arg"
-		done
+	printf ' \\\n\t%s "$@"\n' "$safer_image"
 
-		printf ' \\\n\t%s "$@"\n' "$image"
+} > "$script_file"
 
-	} > "$script_file"
-
-	install -D "$script_file" "$script_dest"
-	rm -f "$script_file"
-}
-
-write_script "$safer_runtime_cmd" "$safer_runtime_args" "$safer_dir" "$safer_cmd" "$safer_image" "$safer_entryporint" "$@"
+install -D "$script_file" "$script_dest"
+rm -f "$script_file"
