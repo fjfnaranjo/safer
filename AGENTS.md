@@ -115,6 +115,19 @@ The script sources config files in this order (lines 33-35):
 
 When modifying configuration handling, preserve this precedence order.
 
+### Environment Variables vs CLI Options
+
+Not all CLI options need environment variable support. Consider:
+
+- **Runtime options** (`-R`, `-X`, `SAFER_RT_CMD`, `SAFER_RT_ARGS`): Suitable for env vars because the container runtime (podman/docker) is typically the same across all projects on a system.
+
+- **Project+tool-specific options** (`-e`, `-p`): Typically should NOT have env vars because they are project+tool-specific (entrypoints, ports) and rarely used globally.
+
+- **Project-specify, but not tool specific**: It makes sense they have
+and env var because the `.saferrc` exists for this reason.
+
+When adding a new option, consider whether it makes sense as an environment variable. If it's project+tool-specific, omit the env var.
+
 ---
 
 ## Development Workflow
