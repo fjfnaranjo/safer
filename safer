@@ -50,14 +50,14 @@ esac
 
 safer_cmd=
 safer_image=
-safer_entryporint=
+safer_entrypoint=
 safer_runtime_cmd="$SAFER_RT_CMD"
 safer_runtime_args="$SAFER_RT_ARGS"
 
 while getopts vhe:d:R:X: opt
 do
 	case $opt in
-		e) safer_entryporint=$OPTARG ;;
+		e) safer_entrypoint=$OPTARG ;;
 		d) safer_dir=$OPTARG ;;
 		R) safer_runtime_cmd=$OPTARG ;;
 		X) safer_runtime_args=$OPTARG ;;
@@ -104,8 +104,8 @@ cwd=$(pwd)
 		printf '\t%s \\\n' "$safer_runtime_args"
 	fi
 
-	if [ -n "$safer_entryporint" ]; then
-		printf '\t--entrypoint "%s" \\\n' "$safer_entryporint"
+	if [ -n "$safer_entrypoint" ]; then
+		printf '\t--entrypoint "%s" \\\n' "$safer_entrypoint"
 	fi
 
 	printf '\t-v "%s":"%s" \\\n' "$cwd" "$cwd"

@@ -165,7 +165,7 @@ Don't leave testing artifacts around.
 while getopts vhe:d:R:X: opt
 do
     case $opt in
-        e) safer_entryporint=$OPTARG ;;
+        e) safer_entrypoint=$OPTARG ;;
         d) safer_dir=$OPTARG ;;
         R) safer_runtime_cmd=$OPTARG ;;
         X) safer_runtime_args=$OPTARG ;;
