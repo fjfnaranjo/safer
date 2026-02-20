@@ -139,6 +139,7 @@ When adding a new option, consider whether it makes sense as an environment vari
 2. Add environment variable support alongside CLI options
 3. Update `safer.1` man page for new options
 4. Update `README.md` if user-facing behavior changes
+5. Remove the TODO comment associated with the feature if it exists.
 
 ### Running Locally
 
@@ -161,7 +162,8 @@ podman run --rm -i \
 ./safer
 ```
 
-Don't leave testing artifacts around.
+Don't leave testing artifacts around, but respect existing contents in
+`.safer/` because they may be in use by the safer developers themselves.
 
 ### CI/CD
 
