@@ -95,8 +95,9 @@ This project will not have tests.
 ### Code Organization
 
 The main script follows this structure:
-1. **Section 1**: Initialization and argument parsing (lines 8-78)
-2. **Section 2**: Script generation/writing (lines 92-123)
+1. **Section 1**: Initialization and argument parsing
+2. **Section 2**: Preprocessing of variables
+2. **Section 3**: Script generation/writing
 
 When extending, maintain this section-based organization.
 

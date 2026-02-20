@@ -77,6 +77,7 @@ fi
 
 shift 2
 
+# Section 2: Preprocessing of variables
 if [ -z "$safer_runtime_cmd" ]; then
 	if command -v podman >/dev/null 2>&1; then
 		safer_runtime_cmd=podman
@@ -89,7 +90,7 @@ if [ -z "$safer_runtime_args" ] && [ "$safer_runtime_cmd" = "docker" ]; then
 	safer_runtime_args='--user "$(id -u):$(id -g)"'
 fi
 
-# Section 2: Writing the script
+# Section 3: Writing the script
 
 script_dest="$safer_dir/$safer_cmd"
 script_file=$(mktemp)
