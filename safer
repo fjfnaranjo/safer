@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# TODO: opening ports
 # TODO: persistence
 # TODO: auto-image from cmd name
 # TODO: safer-images if not image
@@ -21,6 +20,7 @@ For the full list of Options and Environment Vars, see the man page.
 
 Options:
  -e             Tool entrypoint in the image.
+ -p             Port to expose (e.g., 8080 or 80:8080).
  -d             Directory for the scripts. Default: .safer .
  -v, --version  Display the current version.
  -h, --help     Display usage and exit.
@@ -51,13 +51,15 @@ esac
 safer_cmd=
 safer_image=
 safer_entrypoint=
+safer_port=
 safer_runtime_cmd="$SAFER_RT_CMD"
 safer_runtime_args="$SAFER_RT_ARGS"
 
-while getopts vhe:d:R:X: opt
+while getopts vhe:p:d:R:X: opt
 do
 	case $opt in
 		e) safer_entrypoint=$OPTARG ;;
+		p) safer_port=$OPTARG ;;
 		d) safer_dir=$OPTARG ;;
 		R) safer_runtime_cmd=$OPTARG ;;
 		X) safer_runtime_args=$OPTARG ;;
@@ -78,6 +80,14 @@ fi
 shift 2
 
 # Section 2: Preprocessing of variables
+
+if [ -n "$safer_port" ]; then
+	case "$safer_port" in
+		*:*) safer_port_map="$safer_port" ;;
+		*) safer_port_map="$safer_port:$safer_port" ;;
+	esac
+fi
+
 if [ -z "$safer_runtime_cmd" ]; then
 	if command -v podman >/dev/null 2>&1; then
 		safer_runtime_cmd=podman
@@ -107,6 +117,10 @@ cwd=$(pwd)
 
 	if [ -n "$safer_entrypoint" ]; then
 		printf '\t--entrypoint "%s" \\\n' "$safer_entrypoint"
+	fi
+
+	if [ -n "$safer_port_map" ]; then
+		printf '\t-p "%s" \\\n' "$safer_port_map"
 	fi
 
 	printf '\t-v "%s":"%s" \\\n' "$cwd" "$cwd"
