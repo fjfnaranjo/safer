@@ -1,0 +1,17 @@
+- Create a new release in GitHub
+	- Tag: release-<version>
+	- Title: <version>
+	- Version examples: 0.1-rc1 0.1 0.1.1
+	- Mark "rc" releases as pre-releases
+- Wait for release workflow to attach the files
+- Update and commit homebrew-safer
+  - Download release .tar.gz
+  - Get checksum: shasum -a 256 ...
+  - Update:
+    - sha256
+    - version
+    - url
+  - Commit message: Release <version>
+- Update and commit safer docs
+  - sed -i 's/release-<old_version>/release-<version>/g' README.md web/index.html
+  - Commit message: Update install instructions after release <version>
