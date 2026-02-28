@@ -8,15 +8,26 @@ safer \- run project tools in containers using proxy scripts
 [OPTIONS] <CMD> <IMAGE> [DIR...]
 .SH DESCRIPTION
 .B safer
-creates a CMD script to run a dev tool using a container IMAGE.
+creates a CMD script to run a dev tool in the current directory using a
+container IMAGE.
 .P
 The current directory, and any extra DIR specified, are mounted in the
-container using the same paths as the mount points.
+container using the same paths.
 .P
-The commands are created in the .safer directory. You can add this
+The scripts are created in the .safer directory. You can add this
 directory to your PATH or you can run
 .B safer
 without any option to run a SHELL with a modified PATH.
+.P
+Optionally, instead of running a new container each time the CMD is
+called, you can specify a name for a container with
+.BR -k .
+If so, a named persistent container will be created by the script and
+the commands will execute using
+.BR exec,
+preserving the state of the container across executions. This container
+can be stopped using the CMD with the injected argument
+.BR --safer-stop.
 .SH OPTIONS
 .TP
 .BR \-e
@@ -24,6 +35,9 @@ Tool entrypoint in the image.
 .TP
 .BR \-p
 Port to expose (e.g., 8080 or 80:8080).
+.TP
+.BR \-k
+Use this name to persist the container.
 .TP
 .BR \-d
 Directory for the scripts. Default: .safer .
@@ -35,6 +49,12 @@ Runtime cli command. Override podman/docker detection.
 Runtime extra args.
 .br
 Docker default: '--user "$(id -u):$(id -g)"'.
+.TP
+.BR \-K
+Command used to persist the container. Default: sleep inf .
+.TP
+.BR \-S
+Argument injected to stop persisting containers. Default: --safer-stop .
 .TP
 .BR \-v ", " \-\-version
 Display the current version.
@@ -53,6 +73,12 @@ Runtime cli command. Override podman/docker detection.
 Runtime extra args.
 .br
 Docker default: '--user "$(id -u):$(id -g)"'.
+.TP
+.BR SAFER_PERSIST_CMD
+Command used to persist the container. Default: sleep inf .
+.TP
+.BR SAFER_PERSIST_STOP_CMD
+Argument injected to stop persisting containers. Default: --safer-stop .
 .TP
 .BR SHELL
 Shell used to run the sub-shell when no args are specified.

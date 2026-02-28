@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# TODO: persistence
 # TODO: auto-image from cmd name
 # TODO: safer-images if not image
 
@@ -21,6 +20,7 @@ For the full list of Options and Environment Vars, see the man page.
 Options:
  -e             Tool entrypoint in the image.
  -p             Port to expose (e.g., 8080 or 80:8080).
+ -k             Use this name to persist the container.
  -d             Directory for the scripts. Default: .safer .
  -v, --version  Display the current version.
  -h, --help     Display usage and exit.
@@ -52,17 +52,23 @@ safer_cmd=
 safer_image=
 safer_entrypoint=
 safer_port=
+safer_inf=
 safer_runtime_cmd="$SAFER_RT_CMD"
 safer_runtime_args="$SAFER_RT_ARGS"
+safer_inf_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
+safer_inf_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts vhe:p:d:R:X: opt
+while getopts vhe:p:k:d:R:X:K:S: opt
 do
 	case $opt in
 		e) safer_entrypoint=$OPTARG ;;
 		p) safer_port=$OPTARG ;;
+		k) safer_inf=$OPTARG ;;
 		d) safer_dir=$OPTARG ;;
 		R) safer_runtime_cmd=$OPTARG ;;
 		X) safer_runtime_args=$OPTARG ;;
+		K) safer_inf_cmd=$OPTARG ;;
+		S) safer_inf_stop_cmd=$OPTARG ;;
 		*) ;;
 	esac
 done
@@ -100,37 +106,85 @@ if [ -z "$safer_runtime_args" ] && [ "$safer_runtime_cmd" = "docker" ]; then
 	safer_runtime_args='--user "$(id -u):$(id -g)"'
 fi
 
+if [ -n "$safer_inf" ] && [ -z "$safer_entrypoint" ]; then
+	safer_entrypoint=$(
+		$safer_runtime_cmd image inspect \
+		--format '{{.Config.Entrypoint}}' \
+		"$safer_image"
+	)
+	safer_entrypoint="$(echo "$safer_entrypoint" | sed 's/^.//')"
+	safer_entrypoint="$(echo "$safer_entrypoint" | sed 's/.$//')"
+	safer_entrypoint="$(echo "$safer_entrypoint" | sed 's/ /" "/g')"
+fi
+
 # Section 3: Writing the script
 
 script_dest="$safer_dir/$safer_cmd"
 script_file=$(mktemp)
 cwd=$(pwd)
+if [ -n "$safer_inf" ]; then
+	pad='\t'
+fi
 
 {
 	printf '#!/bin/sh\n'
 
-	printf '%s run --rm -i \\\n' "$safer_runtime_cmd"
-
-	if [ -n "$safer_runtime_args" ]; then
-		printf '\t%s \\\n' "$safer_runtime_args"
+	if [ -n "$safer_inf" ]; then
+		printf 'if [ "$*" = "%s" ]; then\n' "$safer_inf_stop_cmd"
+		printf '\t%s kill %s\n' "$safer_runtime_cmd" "$safer_inf"
+		printf '\texit\n'
+		printf 'fi\n'
+		printf 'if ! %s container inspect %s >/dev/null 2>&1; then\n' "$safer_runtime_cmd" "$safer_inf"
 	fi
 
-	if [ -n "$safer_entrypoint" ]; then
-		printf '\t--entrypoint "%s" \\\n' "$safer_entrypoint"
+	if [ -n "$safer_inf" ]; then
+		printf '\t%s run --rm \\\n' "$safer_runtime_cmd"
+	else
+		printf '%s run --rm -ti \\\n' "$safer_runtime_cmd"
+	fi
+
+	if [ -n "$safer_runtime_args" ]; then
+		printf '%b\t%s \\\n' "$pad" "$safer_runtime_args"
+	fi
+
+	if [ -n "$safer_inf" ]; then
+		printf '\t\t--entrypoint '\'''\'' \\\n'
+	elif [ -n "$safer_entrypoint" ]; then
+		printf '\t--entrypoint '\''%s'\'' \\\n' "$safer_entrypoint"
 	fi
 
 	if [ -n "$safer_port_map" ]; then
-		printf '\t-p "%s" \\\n' "$safer_port_map"
+		printf '%b\t-p "%s" \\\n' "$pad" "$safer_port_map"
 	fi
 
-	printf '\t-v "%s":"%s" \\\n' "$cwd" "$cwd"
-	printf '\t-w "%s"' "$cwd"
+	printf '%b\t-v "%s":"%s" \\\n' "$pad" "$cwd" "$cwd"
+	printf '%b\t-w "%s"' "$pad" "$cwd"
 
 	for arg in "$@"; do
-		printf ' \\\n\t-v "%s":"%s"' "$arg" "$arg"
+		printf ' \\\n%b\t-v "%s":"%s"' "$pad" "$arg" "$arg"
 	done
 
-	printf ' \\\n\t%s "$@"\n' "$safer_image"
+	if [ -n "$safer_inf" ]; then
+		printf ' \\\n\t\t-d --name "%s" \\\n' "$safer_inf"
+	else
+		printf ' \\\n'
+	fi
+
+	if [ -n "$safer_inf" ]; then
+		printf '\t\t%s %s\n' "$safer_image" "$safer_inf_cmd"
+	else
+		printf '\t%s "$@"\n' "$safer_image"
+	fi
+
+	if [ -n "$safer_inf" ]; then
+		printf 'fi\n'
+			printf '%s exec -ti \\\n' "$safer_runtime_cmd"
+		if [ -n "$safer_runtime_args" ]; then
+			printf '\t%s \\\n' "$safer_runtime_args"
+		fi
+		printf '\t-w "%s" \\\n' "$cwd"
+		printf '\t%s "%s" "$@"\n' "$safer_inf" "$safer_entrypoint"
+	fi
 
 } > "$script_file"
 
