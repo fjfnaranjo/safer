@@ -8,9 +8,8 @@
   - Download release .tar.gz
   - Get checksum: shasum -a 256 ...
   - Update:
-    - sha256
-    - version
     - url
+    - sha256
   - Commit message: Release <version>
 - Update and commit safer docs
   - sed -i 's/release-<old_version>/release-<version>/g' README.md web/index.html
