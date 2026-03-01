@@ -2,24 +2,20 @@
 
 ## Project Overview
 
-**safer** is a POSIX shell script project that creates proxy scripts to run development tools inside container runtimes (podman/docker). The scripts mount project files at the same paths on the container, enabling tools like LSPs to report file locations correctly.
+**safer** is a POSIX shell script project that creates proxy scripts to run development tools inside container runtimes (podman/docker). The scripts mounts project files at the same paths on the container, enabling tools like LSPs to report file locations correctly.
 
-- **Language**: POSIX-compliant shell script (`#!/bin/sh`)
-- **Main file**: `safer` (124 lines)
-- **Documentation**: `safer.1` (man page), `README.md`, `web/` (GitHub Pages)
-
----
+- **Language**: POSIX-compliant shell script.
+- **Main file**: `safer`
+- **Man page**: `safer.1`
+- **Documentation**: `README.md`
+- **Landing site**: single `web/index.html` file.
+- **TODO items**: `TODO.md`
 
 ## Build, Lint, and Test Commands
 
 ### Building
 
 This project does not require compilation. The `safer` script is directly executable.
-
-```sh
-# Verify POSIX compliance with shellcheck (recommended)
-shellcheck -e SC1091 -e SC2016 -s sh safer
-```
 
 ### Linting
 
@@ -29,6 +25,7 @@ The project should follow POSIX shell standards. Use `shellcheck` with POSIX mod
 # Install shellcheck (if not available)
 # Debian/Ubuntu: apt install shellcheck
 # macOS: brew install shellcheck
+# Alpine: apk add shellcheck
 
 # Run shellcheck with POSIX dialect
 shellcheck -e SC1091 -e SC2016 -s sh safer
@@ -39,32 +36,25 @@ shellcheck -e SC1091 -e SC2016 -s sh -W error safer
 
 ### Testing
 
-**Currently there is no formal test suite.**
+Currently there is no formal test suite.
 
-This project will not have tests.
-
----
+The project will implement tests in the future using a set of "expected" files in `test/refs`. Then, in a `Makefile`, a `test` target will ran a simple suite of `safer` invocations pointing it to `test/outputs` and running the `diff` command directly between each item ref and its output.
 
 ## Code Style Guidelines
 
 ### General Principles
 
 1. **POSIX Compliance**: Write for `/bin/sh`, not bash-specific syntax
-2. **Portability**: Use only POSIX-compliant features; test on multiple shells (sh, dash, bash)
+2. **Portability**: Use only POSIX-compliant features; test on multiple shells (sh, dash, bash, zsh). Avoid bashisms: no `[[ ]]`, no `$(())`, no process substitution `<()`, no arrays
 3. **Simplicity**: Prefer simple, readable solutions over clever ones
-
-### Imports and External Dependencies
-
-- Use only POSIX utilities (`printf`, `command`, `test`, etc.)
-- Avoid bashisms: no `[[ ]]`, no `$(())`, no process substitution `<()`, no arrays
-- Detect external commands gracefully (e.g., podman vs docker detection in lines 81-85)
+4. **Non-dependant**: Use only POSIX utilities (`printf`, `command`, `test`, `sed`, etc.)
 
 ### Formatting
 
-- Use tabs for indentation in generated scripts (see line 101-118)
 - Use tabs for indentation for the main script
+- Use tabs for indentation in generated scripts
 - Maximum line length: 72 characters (soft limit)
-- Use backslash for line continuation (see lines 101-118)
+- Use backslash for line continuation
 
 ### Types
 
@@ -76,9 +66,9 @@ This project will not have tests.
 ### Naming Conventions
 
 - Variables: lowercase with underscores (`safer_cmd`, `safer_image`)
-- Functions: lowercase with underscores (if used)
-- Constants: uppercase (`SAFER_DIR`, `SAFER_RT_CMD`) only for env vars
-- Scripts generated: lowercase matching the command name
+- Environment vars: uppercase (`SAFER_DIR`, `SAFER_RT_CMD`)
+- Scripts generated: lowercase matching the command name _ and - if
+present.
 
 ### Error Handling
 
@@ -88,7 +78,7 @@ This project will not have tests.
 
 ### Variable Quoting
 
-- quote variable expansions unless they are constant: `"$var"`, not `$var`
+- Quote variable expansions unless they are constant: `"$var"`, not `$var`
 - Quote command substitutions: `"$(pwd)"`, not `$(pwd)`
 - Use double quotes for variable expansion, single quotes for literals
 
@@ -109,7 +99,7 @@ When extending, maintain this section-based organization.
 
 ### Config Files
 
-The script sources config files in this order (lines 33-35):
+The script sources config files in this order:
 1. `/etc/safer` (system-wide)
 2. `$HOME/.saferrc` (user-specific)
 3. `.saferrc` (project-specific)
@@ -129,8 +119,6 @@ and env var because the `.saferrc` exists for this reason.
 
 When adding a new option, consider whether it makes sense as an environment variable. If it's project+tool-specific, omit the env var.
 
----
-
 ## Development Workflow
 
 ### Adding New Features
@@ -138,8 +126,9 @@ When adding a new option, consider whether it makes sense as an environment vari
 1. Follow the existing section-based code organization
 2. Add environment variable support alongside CLI options
 3. Update `safer.1` man page for new options
-4. Update `README.md` if user-facing behavior changes
-5. Remove the `TODO.md` info associated with the feature if it exists.
+4. Update `README.md` if the user-facing behavior described there changes
+5. Update `web/index.html` if the user-facing behavior described there changes
+6. Remove the `TODO.md` info associated with the feature if it exists.
 
 ### Running Locally
 
@@ -149,17 +138,11 @@ When adding a new option, consider whether it makes sense as an environment vari
 
 # Test the generated script content
 
-```
 #!/bin/sh
 podman run --rm -i \
         -v <pwd>:<pwd> \
         -w <pwd> \
         testy:latest "$@"
-```
-
-
-# Test entering subshell with modified PATH
-./safer
 ```
 
 Don't leave testing artifacts around, but respect existing contents in
@@ -171,11 +154,9 @@ Don't leave testing artifacts around, but respect existing contents in
 - Release workflow: automatically attaches `safer` and `safer.1` to releases
 - Web workflow: deploys `web/` directory to GitHub Pages on master
 
----
-
 ## Common Patterns
 
-### Option Parsing (see lines 57-66)
+### Option Parsing
 
 ```sh
 while getopts vhe:d:R:X: opt
@@ -190,7 +171,7 @@ do
 done
 ```
 
-### Command Detection (see lines 80-86)
+### Runtime Detection
 
 ```sh
 if [ -z "$safer_runtime_cmd" ]; then
@@ -202,38 +183,28 @@ if [ -z "$safer_runtime_cmd" ]; then
 fi
 ```
 
-### Generated Script Template (see lines 98-120)
+### Generated Script structure
 
 When modifying the generated script format, maintain:
 - `#!/bin/sh` shebang
 - POSIX-compliant container runtime commands
 - Proper quoting of all variables
 
----
+Take into account how the generation of plain vs persistent scripts is mixed all together. Persistent scripts interlace, with tabs in front of the plain command if they are present, so that that generation is used as part of the `run` command for both the plain and the persistent version, and a new `exec` command is added below only for the persistent version. Is dirty, but simple and covered by the tests.
 
 ## File Structure
 
 ```
 .
-├── safer          # Main script (executable)
-├── safer.1        # Man page
-├── README.md      # User documentation
-├── web/           # GitHub Pages site
+├── safer            # Main script (executable)
+├── safer.1          # Man page
+├── README.md        # User documentation
+├── TODO.md          # TODO list
+├── RELEASE          # Notes on the manual steps of a new release
+├── web/index.html   # GitHub Pages single-page landing site
 ├── .github/
 │   └── workflows/
 │       ├── release.yml    # Release automation
 │       └── web.yml        # Pages deployment
 └── AGENTS.md      # This file
 ```
-
----
-
-## Future Improvements (TODO)
-
-- Opening ports from container to host
-- Persistence of created scripts
-- Auto-image detection from command name
-- Safer-images if image not specified
-- Formal test suite
-
-When working on these, maintain POSIX compliance and the existing code style.
