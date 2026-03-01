@@ -14,13 +14,6 @@ Self explanatory.
   the runtime working directory to use this directory instead of the
   base one.
 
-## CD workflow
-
-- Improve the `release.yml` workflow to pack a `.tar.gz` with the script
-  and the man page with paths relative to `~/.local` and `/usr/local`.
-- Remember to inject the version in `safer` using `sed`.
-- Update install instructions and Homebrew formula after this changes.
-
 ## safer library
 
 ### Default commands by tool
