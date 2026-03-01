@@ -3,7 +3,7 @@
 	- Title: <version>
 	- Version examples: 0.1-rc1 0.1 0.1.1
 	- Mark "rc" releases as pre-releases
-- Wait for release workflow to attach the files
+- Wait for release workflow to attach the file
 - Update and commit homebrew-safer
   - Download release .tar.gz
   - Get checksum: shasum -a 256 ...
@@ -14,4 +14,5 @@
   - Commit message: Release <version>
 - Update and commit safer docs
   - sed -i 's/release-<old_version>/release-<version>/g' README.md web/index.html
+  - sed -i 's/safer-<old_version>/safer-<version>/g' README.md web/index.html
   - Commit message: Update install instructions after release <version>

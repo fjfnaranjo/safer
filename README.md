@@ -30,26 +30,27 @@ directory to your PATH or you can run `safer` without any option to run
 a sub-shell with a modified PATH.
 ## Installing safer
 ### Linux
-Download safer:
+Download and unpack the last safer release:
 
 ```
 cd /tmp
-curl -Lo safer https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc3/safer
-curl -Lo safer.1 https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc3/safer.1
+curl -LO https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc4/safer-0.1-rc4.tar.gz
+tar -xzf safer-0.1-rc4.tar.gz
+cd safer-0.1-rc4
 ```
 
 Install the files for your user (if you have `~/.local/bin` in your **PATH**):
 
 ```
-install -Dm755 safer ~/.local/bin/safer
-install -Dm644 safer.1 ~/.local/share/man/man1/safer.1
+install -Dm755 bin/safer ~/.local/bin/safer
+install -Dm644 share/man/man1/safer.1 ~/.local/share/man/man1/safer.1
 ```
 
 Or install them in the system:
 
 ```
-sudo install -Dm755 safer /usr/local/bin/safer
-sudo install -Dm644 safer.1 /usr/local/share/man/man1/safer.1
+sudo install -Dm755 bin/safer /usr/local/bin/safer
+sudo install -Dm644 share/man/man1/safer.1 /usr/local/share/man/man1/safer.1
 ```
 ### MacOS
 Use Homebrew:
