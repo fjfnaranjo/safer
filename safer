@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# TODO: auto-image from cmd name
-# TODO: safer-images if not image
-
 # Section 1: Init safer and read args/env
 
 safer_ver=0.0-dev

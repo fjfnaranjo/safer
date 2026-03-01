@@ -105,7 +105,7 @@ When extending, maintain this section-based organization.
 
 - Use comments to mark sections (e.g., `# Section 1: Init safer and read args/env`)
 - Avoid unnecessary comments; code should be self-documenting
-- Use TODO comments for future work (see lines 3-6)
+- Use `TODO.md` content for documenting future work
 
 ### Config Files
 
@@ -139,7 +139,7 @@ When adding a new option, consider whether it makes sense as an environment vari
 2. Add environment variable support alongside CLI options
 3. Update `safer.1` man page for new options
 4. Update `README.md` if user-facing behavior changes
-5. Remove the TODO comment associated with the feature if it exists.
+5. Remove the `TODO.md` info associated with the feature if it exists.
 
 ### Running Locally
 
