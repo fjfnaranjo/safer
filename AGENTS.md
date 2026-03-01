@@ -28,10 +28,7 @@ The project should follow POSIX shell standards. Use `shellcheck` with POSIX mod
 # Alpine: apk add shellcheck
 
 # Run shellcheck with POSIX dialect
-shellcheck -e SC1091 -e SC2016 -s sh safer
-
-# Treat warnings as errors (CI mode)
-shellcheck -e SC1091 -e SC2016 -s sh -W error safer
+make check
 ```
 
 ### Testing

@@ -27,11 +27,6 @@ Self explanatory.
       output a non-zero status and fail the test.
 - Explain testing strategy in `AGENTS.md`.
 
-### Add shellcheck
-
-- Create a target in a `Makefile` to run `shellcheck -s sh` over
-  `safer`.
-
 ### Configure a GitHub Action
 
 - Create a workflow `ci.yml` to launch the check and the tests on new
