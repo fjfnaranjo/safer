@@ -12,6 +12,5 @@
     - sha256
   - Commit message: Release <version>
 - Update and commit safer docs
-  - sed -i 's/release-<old_version>/release-<version>/g' README.md web/index.html
-  - sed -i 's/safer-<old_version>/safer-<version>/g' README.md web/index.html
+  - make update-install-docs SAFER_OLD_VERSION=0.1-rc4 SAFER_VERSION=0.1-rc5
   - Commit message: Update install instructions after release <version>

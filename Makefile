@@ -21,6 +21,12 @@ pack:
 	sed -i "s/0.0-dev/$${SAFER_VERSION:-0.0-dev}/" "dist/safer-$${SAFER_VERSION:-0.0-dev}/bin/safer"
 	tar czf "dist/safer-$${SAFER_VERSION:-0.0-dev}.tar.gz" -C dist "safer-$${SAFER_VERSION:-0.0-dev}"
 
+.PHONY: update-install-docs
+update-install-docs:
+	@test -n "$$SAFER_OLD_VERSION" && test -n "$$SAFER_VERSION"
+	@sed -i 's/release-$$SAFER_OLD_VERSION/release-$$SAFER_VERSION/g' README.md web/index.html
+	@sed -i 's/safer-$$SAFER_OLD_VERSION/safer-$$SAFER_VERSION/g' README.md web/index.html
+
 .PHONY: clean
 clean:
 	rm -f tests/outputs/*
