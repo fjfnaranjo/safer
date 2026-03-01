@@ -33,9 +33,14 @@ make check
 
 ### Testing
 
-Currently there is no formal test suite.
+```sh
+# Run the test suite
+make test
+```
 
-The project will implement tests in the future using a set of "expected" files in `test/refs`. Then, in a `Makefile`, a `test` target will ran a simple suite of `safer` invocations pointing it to `test/outputs` and running the `diff` command directly between each item ref and its output.
+The project implements tests using a set of "expected" files in `tests/refs`. Then, in a `Makefile`, a `test` target runs a simple suite of `safer` invocations pointing it to `tests/outputs` and running the `diff` command directly between each item ref and its output.
+
+This suite is small on purpose. Keep the tests broad, covering multiple parameters even if they don't indicate a single point of failure.
 
 ## Code Style Guidelines
 

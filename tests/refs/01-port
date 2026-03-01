@@ -1,0 +1,6 @@
+#!/bin/sh
+podman run --rm -ti \
+	-p "10443:10443" \
+	-v "CWD":"CWD" \
+	-w "CWD" \
+	a_tool_image:latest "$@"

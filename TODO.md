@@ -14,24 +14,6 @@ Self explanatory.
   the runtime working directory to use this directory instead of the
   base one.
 
-## CI workflow
-
-### Add testing
-
-- Create a set of expected templates in `test/refs`.
-- Create a target in a `Makefile` with a chain of commands to implement
-  the tests:
-    - Run _safer_ command with some parameters outputting to
-      `test/outputs`.
-    - Diff each command against is expected counterpart. Diff will
-      output a non-zero status and fail the test.
-- Explain testing strategy in `AGENTS.md`.
-
-### Configure a GitHub Action
-
-- Create a workflow `ci.yml` to launch the check and the tests on new
-  pull requests.
-
 ## CD workflow
 
 - Improve the `release.yml` workflow to pack a `.tar.gz` with the script
