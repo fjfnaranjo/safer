@@ -18,7 +18,7 @@ Options:
  -e             Tool entrypoint in the image.
  -p             Port to expose (e.g., 8080 or 80:8080).
  -k             Use this name to persist the container.
- -d             Directory for the scripts. Default: .safer .
+ -f             Force script replacement.
  -v, --version  Display the current version.
  -h, --help     Display usage and exit.
 
@@ -50,12 +50,13 @@ safer_image=
 safer_entrypoint=
 safer_port=
 safer_inf=
+safer_force=
 safer_runtime_cmd="$SAFER_RT_CMD"
 safer_runtime_args="$SAFER_RT_ARGS"
 safer_inf_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 safer_inf_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts vhe:p:k:d:R:X:K:S: opt
+while getopts vhe:p:k:d:R:X:K:S:f opt
 do
 	case $opt in
 		e) safer_entrypoint=$OPTARG ;;
@@ -66,6 +67,7 @@ do
 		X) safer_runtime_args=$OPTARG ;;
 		K) safer_inf_cmd=$OPTARG ;;
 		S) safer_inf_stop_cmd=$OPTARG ;;
+		f) safer_force=1 ;;
 		*) ;;
 	esac
 done
@@ -83,6 +85,12 @@ fi
 shift 2
 
 # Section 2: Preprocessing of variables
+
+script_dest="$safer_dir/$safer_cmd"
+if [ -e "$script_dest" ] && [ -z "$safer_force" ]; then
+	echo "$script_dest already exists."
+	exit 1
+fi
 
 if [ -n "$safer_port" ]; then
 	case "$safer_port" in
@@ -116,7 +124,6 @@ fi
 
 # Section 3: Writing the script
 
-script_dest="$safer_dir/$safer_cmd"
 script_file=$(mktemp)
 cwd=$(pwd)
 if [ -n "$safer_inf" ]; then

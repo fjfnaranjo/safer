@@ -2,10 +2,6 @@
 
 ## Missing functionality
 
-### Avoid replacing existing scripts
-
-Self explanatory.
-
 ### CWD detection
 
 - Detect when a safer script is being called from outside the project
