@@ -45,12 +45,6 @@ case " $@ " in
 	*" -h "*|*" --help "*) echo "$safer_usage" && exit ;;
 esac
 
-safer_cmd=
-safer_image=
-safer_entrypoint=
-safer_port=
-safer_inf=
-safer_force=
 safer_runtime_cmd="$SAFER_RT_CMD"
 safer_runtime_args="$SAFER_RT_ARGS"
 safer_inf_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
@@ -74,15 +68,14 @@ done
 
 shift $((OPTIND - 1))
 
-[ -z "$safer_cmd" ] && safer_cmd="$1"
-[ -z "$safer_image" ] && safer_image="$2"
-
-if [ -z "$safer_cmd" ] || [ -z "$safer_image" ]; then
+if [ $# -gt 1 ]; then
+	safer_cmd="$1"
+	safer_image="$2"
+	shift 2
+else
 	echo "$safer_usage"
 	exit
 fi
-
-shift 2
 
 # Section 2: Preprocessing of variables
 
