@@ -45,8 +45,6 @@ case " $@ " in
 	*" -h "*|*" --help "*) echo "$safer_usage" && exit ;;
 esac
 
-safer_runtime_cmd="$SAFER_RT_CMD"
-safer_runtime_args="$SAFER_RT_ARGS"
 safer_inf_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 safer_inf_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
@@ -58,7 +56,7 @@ do
 		k) safer_inf=$OPTARG ;;
 		d) safer_dir=$OPTARG ;;
 		R) safer_runtime_cmd=$OPTARG ;;
-		X) safer_runtime_args=$OPTARG ;;
+		X) safer_opts_runtime_args=$OPTARG ;;
 		K) safer_inf_cmd=$OPTARG ;;
 		S) safer_inf_stop_cmd=$OPTARG ;;
 		f) safer_force=1 ;;
@@ -92,15 +90,22 @@ if [ -n "$safer_port" ]; then
 	esac
 fi
 
-if [ -z "$safer_runtime_cmd" ]; then
+if [ -z "${safer_runtime_cmd:=$SAFER_RT_CMD}" ]; then
 	if command -v podman >/dev/null 2>&1; then
 		safer_runtime_cmd=podman
 	elif command -v docker >/dev/null 2>&1; then
 		safer_runtime_cmd=docker
+	else
+		echo "Cannot detect a container runtime. See man page for more info."
+		exit 1
 	fi
 fi
 
-if [ -z "$safer_runtime_args" ] && [ "$safer_runtime_cmd" = "docker" ]; then
+if [ "${safer_opts_runtime_args+x}" ]; then
+	safer_runtime_args="$safer_opts_runtime_args"
+elif [ "${SAFER_RT_ARGS+x}" ]; then
+	safer_runtime_args="$SAFER_RT_ARGS"
+elif [ "$safer_runtime_cmd" = "docker" ] || [ "$safer_runtime_cmd" = "sudo docker" ]; then
 	safer_runtime_args='--user "$(id -u):$(id -g)"'
 fi
 

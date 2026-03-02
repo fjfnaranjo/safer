@@ -1,0 +1,6 @@
+#!/bin/sh
+docker run --rm -ti \
+	--user "$(id -u):$(id -g)" \
+	-v "CWD":"CWD" \
+	-w "CWD" \
+	a_tool_image:latest "$@"

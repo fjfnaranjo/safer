@@ -1,0 +1,5 @@
+#!/bin/sh
+sudo docker run --rm -ti \
+	-v "CWD":"CWD" \
+	-w "CWD" \
+	a_tool_image:latest "$@"

@@ -10,13 +10,6 @@
   the runtime working directory to use this directory instead of the
   base one.
 
-### Docker interactions
-
-- Allow to set the runtime args as empty, to override the default
-  `-u id:grp` form.
-- Check support to use Docker with `sudo`. If the runtime command can be
-  used for this, review the runtime default calculation.
-
 ## safer library
 
 ### Default commands by tool

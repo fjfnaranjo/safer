@@ -70,12 +70,12 @@ Display usage and exit.
 Directory for the scripts. Default: .safer .
 .TP
 .BR SAFER_RT_CMD
-Runtime cli command. Override podman/docker detection.
+Runtime cli command. See
+.BR NOTES.
 .TP
 .BR SAFER_RT_ARGS
-Runtime extra args.
-.br
-Docker default: '--user "$(id -u):$(id -g)"'.
+Runtime extra args. See
+.BR NOTES.
 .TP
 .BR SAFER_PERSIST_CMD
 Command used to persist the container. Default: sleep inf .
@@ -89,3 +89,18 @@ Shell used to run the sub-shell when no args are specified.
 .TP
 .BR /etc/safer ", "~/.saferrc ", ".saferrc
 These files are sourced by safer.
+.SH NOTES
+.B safer
+will try to detect a container runtime. It will prefer
+.B podman
+over
+.B docker.
+.BR SAFER_RT_CMD
+and
+.BR SAFER_RT_ARGS
+will override this detection.
+.P
+If
+.B docker
+is selected, '--user "$(id -u):$(id -g)"' will be used as the default
+runtime arguments.
