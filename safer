@@ -115,24 +115,49 @@ elif [ "$safer_runtime_cmd" = "docker" ] || [ "$safer_runtime_cmd" = "sudo docke
 	safer_runtime_args='--user "$(id -u):$(id -g)"'
 fi
 
-if [ -n "$safer_inf" ] && [ -z "$safer_entrypoint" ]; then
-	safer_entrypoint=$(
-		$safer_runtime_cmd image inspect \
-		--format '{{.Config.Entrypoint}}' \
-		"$safer_image"
-	)
-	safer_entrypoint="$(echo "$safer_entrypoint" | sed 's/^.//')"
-	safer_entrypoint="$(echo "$safer_entrypoint" | sed 's/.$//')"
-	safer_entrypoint="$(echo "$safer_entrypoint" | sed 's/ /" "/g')"
+# Section 3: Preprocessing of the original entrypoint parts
+
+if [ -n "$safer_inf" ]; then
+	pad='\t'  # indent the original run lines on persistent scripts
 fi
 
-# Section 3: Writing the script
+# Freeing $@
+extra_volumes=
+for arg in "$@"; do
+	next_volume=$(printf ' \\\n%b\t-v "%s":"%s"' "$pad" "$arg" "$arg")
+	extra_volumes=$extra_volumes$next_volume
+done
+
+# Capture original image entrypoint and args
+if [ -n "$safer_inf" ]; then
+	if [ -z "$safer_entrypoint" ]; then
+		set -f
+		IFS='
+'
+		# shellcheck disable=SC2046
+		set -- $(
+			$safer_runtime_cmd image inspect \
+			--format '{{range .Config.Entrypoint}}{{println .}}{{end}}' \
+			"$safer_image"
+		)
+		unset IFS
+
+		if [ $# -gt 0 ]; then
+			og_entrypoint=$1
+			shift
+
+			for arg in "$@"; do
+				og_exec_args=$og_exec_args$(printf "'%s' " "$(printf "%s" "$arg" | sed "s/'/'\\\\''/g")")
+			done
+			[ -n "$og_exec_args" ] && og_exec_args=${og_exec_args%?}
+		fi
+	fi
+fi
+
+# Section 4: Writing the script
 
 script_file=$(mktemp)
 cwd=$(pwd -P)
-if [ -n "$safer_inf" ]; then
-	pad='\t'
-fi
 
 {
 	printf '#!/bin/sh\n'
@@ -179,9 +204,7 @@ fi
 		printf '\t-w "$(pwd -P)"'
 	fi
 
-	for arg in "$@"; do
-		printf ' \\\n%b\t-v "%s":"%s"' "$pad" "$arg" "$arg"
-	done
+	printf '%s' "$extra_volumes"
 
 	if [ -n "$safer_inf" ]; then
 		printf ' \\\n\t\t-d --name "%s" \\\n' "$safer_inf"
@@ -202,7 +225,17 @@ fi
 			printf '\t%s \\\n' "$safer_runtime_args"
 		fi
 		printf '\t-w "$(pwd -P)" \\\n'
-		printf '\t%s "%s" "$@"\n' "$safer_inf" "$safer_entrypoint"
+		if [ -n "$safer_entrypoint" ]; then
+			printf '\t%s '\''%s'\'' "$@"\n' "$safer_inf" "$safer_entrypoint"
+		else
+			if [ -z "$og_entrypoint" ]; then
+				printf '\t%s "$@"\n' "$safer_inf"
+			elif [ -z "$og_exec_args" ]; then
+				printf '\t%s '\''%s'\'' "$@"\n' "$safer_inf" "$og_entrypoint"
+			else
+				printf '\t%s '\''%s'\'' %s "$@"\n' "$safer_inf" "$og_entrypoint" "$og_exec_args"
+			fi
+		fi
 	fi
 
 } > "$script_file"

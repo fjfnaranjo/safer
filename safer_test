@@ -21,6 +21,46 @@ if ./safer basic same_tool_image:latest > /dev/null; then
 fi
 diff tests/refs/basic tests/outputs/basic
 
+# Persistent containers
+if command -v podman >/dev/null 2>&1; then
+	test_runtime=podman
+elif command -v docker >/dev/null 2>&1; then
+	test_runtime=docker
+fi
+
+if [ -n "$test_runtime" ]; then
+	if cd tests/image; then
+		$test_runtime build -f Containerfile.no-entrypoint -t safer-test-image-no-entrypoint . > /dev/null
+		$test_runtime build -f Containerfile.bin -t safer-test-image-bin . > /dev/null
+		$test_runtime build -f Containerfile.sh -t safer-test-image-sh . > /dev/null
+		cd - > /dev/null
+	fi
+
+	# Persistent and no entrypoint
+	./safer -k safer-test-container-no-entrypoint persistent-no-entrypoint safer-test-image-no-entrypoint
+	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-no-entrypoint
+	diff tests/refs/persistent-no-entrypoint tests/outputs/persistent-no-entrypoint
+
+	# Persistent and simple entrypoint
+	./safer -k safer-test-container-bin persistent-bin safer-test-image-bin
+	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-bin
+	diff tests/refs/persistent-bin tests/outputs/persistent-bin
+
+	# Persistent and sh entrypoint
+	./safer -k safer-test-container-sh persistent-sh safer-test-image-sh
+	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-sh
+	diff tests/refs/persistent-sh tests/outputs/persistent-sh
+
+	# Persistent and sh entrypoint plus custom entrypoint, vols and port
+	./safer -p 10443 -e /bin/other_bin -k safer-test-container-complex persistent-complex safer-test-image-sh /vol/1 /vol/2
+	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-complex
+	diff tests/refs/persistent-complex tests/outputs/persistent-complex
+
+	$test_runtime rmi safer-test-image-no-entrypoint > /dev/null
+	$test_runtime rmi safer-test-image-bin > /dev/null
+	$test_runtime rmi safer-test-image-sh > /dev/null
+fi
+
 # Generation with port
 ./safer -p 10443 port a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/port
