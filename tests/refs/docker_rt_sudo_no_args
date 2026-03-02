@@ -1,5 +1,10 @@
 #!/bin/sh
+project_dir="CWD"
+case "$(pwd -P)/" in
+	"$project_dir/"*) ;;
+	*) echo "safer: $0: outside project dir" 2>&1; exit 1 ;;
+esac
 sudo docker run --rm -ti \
 	-v "CWD":"CWD" \
-	-w "CWD" \
+	-w "$(pwd -P)" \
 	a_tool_image:latest "$@"

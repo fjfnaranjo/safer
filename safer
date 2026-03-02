@@ -36,7 +36,13 @@ safer_dir=${SAFER_DIR:-.safer}
 if [ "$#" -eq 0 ]; then
 	case ":$PATH:" in
 		*":$safer_dir:"*) exit ;;
-		*) PATH="$(realpath "$safer_dir"):$PATH" ${SHELL:-sh}; exit ;;
+		*)
+			if ! safer_abs=$(cd "$safer_dir" && pwd -P); then
+				echo "Cannot get an absolute path for '$safer_dir'."
+				exit 1
+			fi
+			PATH="$safer_abs:$PATH" exec "${SHELL:-sh}"
+		;;
 	esac
 fi
 
@@ -123,13 +129,19 @@ fi
 # Section 3: Writing the script
 
 script_file=$(mktemp)
-cwd=$(pwd)
+cwd=$(pwd -P)
 if [ -n "$safer_inf" ]; then
 	pad='\t'
 fi
 
 {
 	printf '#!/bin/sh\n'
+
+	printf 'project_dir="%s"\n' "$cwd"
+	printf 'case "$(pwd -P)/" in\n'
+	printf '\t"$project_dir/"*) ;;\n'
+	printf '\t*) echo "safer: $0: outside project dir" 2>&1; exit 1 ;;\n'
+	printf 'esac\n'
 
 	if [ -n "$safer_inf" ]; then
 		printf 'if [ "$*" = "%s" ]; then\n' "$safer_inf_stop_cmd"
@@ -160,7 +172,12 @@ fi
 	fi
 
 	printf '%b\t-v "%s":"%s" \\\n' "$pad" "$cwd" "$cwd"
-	printf '%b\t-w "%s"' "$pad" "$cwd"
+
+	if [ -n "$safer_inf" ]; then
+		printf '\t\t-w "$project_dir"'
+	else
+		printf '\t-w "$(pwd -P)"'
+	fi
 
 	for arg in "$@"; do
 		printf ' \\\n%b\t-v "%s":"%s"' "$pad" "$arg" "$arg"
@@ -184,7 +201,7 @@ fi
 		if [ -n "$safer_runtime_args" ]; then
 			printf '\t%s \\\n' "$safer_runtime_args"
 		fi
-		printf '\t-w "%s" \\\n' "$cwd"
+		printf '\t-w "$(pwd -P)" \\\n'
 		printf '\t%s "%s" "$@"\n' "$safer_inf" "$safer_entrypoint"
 	fi
 

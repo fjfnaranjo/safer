@@ -1,15 +1,5 @@
 # safer TODO
 
-## Missing functionality
-
-### CWD detection
-
-- Detect when a safer script is being called from outside the project
-  directory and refuse the invocation.
-- When the script is called from under the project directory, modify
-  the runtime working directory to use this directory instead of the
-  base one.
-
 ## safer library
 
 ### Default commands by tool
