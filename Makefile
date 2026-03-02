@@ -1,6 +1,7 @@
 .PHONY: check
 check:
 	@shellcheck -e SC1091 -e SC2016 -s sh safer
+	@shellcheck -e SC1091 -e SC2016 -s sh safer_test
 
 .PHONY: test
 test:
