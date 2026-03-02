@@ -129,28 +129,28 @@ for arg in "$@"; do
 done
 
 # Capture original image entrypoint and args
-if [ -n "$safer_inf" ]; then
-	if [ -z "$safer_entrypoint" ]; then
-		set -f
-		IFS='
+if [ -n "$safer_inf" ] && [ -z "$safer_entrypoint" ]; then
+	set -f
+	IFS='
 '
-		# shellcheck disable=SC2046
-		set -- $(
-			$safer_runtime_cmd image inspect \
-			--format '{{range .Config.Entrypoint}}{{println .}}{{end}}' \
-			"$safer_image"
-		)
-		unset IFS
+	# shellcheck disable=SC2046
+	set -- $(
+		$safer_runtime_cmd image inspect \
+		--format '{{range .Config.Entrypoint}}{{println .}}{{end}}' \
+		"$safer_image"
+	)
+	unset IFS
 
-		if [ $# -gt 0 ]; then
-			og_entrypoint=$1
-			shift
+	if [ $# -gt 0 ]; then
+		og_entrypoint=$1
+		shift
 
-			for arg in "$@"; do
-				og_exec_args=$og_exec_args$(printf "'%s' " "$(printf "%s" "$arg" | sed "s/'/'\\\\''/g")")
-			done
-			[ -n "$og_exec_args" ] && og_exec_args=${og_exec_args%?}
-		fi
+		for arg in "$@"; do
+			og_exec_args=$og_exec_args$(
+				printf "'%s' " "$(printf "%s" "$arg" | sed "s/'/'\\\\''/g")"
+			)
+		done
+		[ -n "$og_exec_args" ] && og_exec_args=${og_exec_args%?}
 	fi
 fi
 
