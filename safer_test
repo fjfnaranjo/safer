@@ -6,9 +6,16 @@ rm -rf tests/outputs
 
 export SAFER_DIR=tests/outputs
 
+if command -v podman >/dev/null 2>&1; then
+	test_runtime=podman
+elif command -v docker >/dev/null 2>&1; then
+	test_runtime=docker
+fi
+
 # Basic generation
 ./safer basic a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/basic
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/basic
 diff tests/refs/basic tests/outputs/basic
 
 # Target other dir and use underscores
@@ -24,25 +31,22 @@ diff tests/refs/basic tests/outputs/basic
 # Generation with port
 ./safer -p 10443 port a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/port
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/port
 diff tests/refs/port tests/outputs/port
 
 # Extra volumes
 ./safer volumes a_tool_image:latest /vol/1 /vol/2
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/volumes
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/volumes
 diff tests/refs/volumes tests/outputs/volumes
 
 # Custom entrypoint
 ./safer -e /bin/other_bin entrypoint a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/entrypoint
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/entrypoint
 diff tests/refs/entrypoint tests/outputs/entrypoint
 
 # Persistent containers
-if command -v podman >/dev/null 2>&1; then
-	test_runtime=podman
-elif command -v docker >/dev/null 2>&1; then
-	test_runtime=docker
-fi
-
 if [ -n "$test_runtime" ]; then
 	if cd tests/image; then
 		$test_runtime build -f Containerfile.no-entrypoint -t safer-test-image-no-entrypoint . > /dev/null
@@ -54,21 +58,25 @@ if [ -n "$test_runtime" ]; then
 	# Persistent and no entrypoint
 	./safer -k safer-test-container-no-entrypoint persistent-no-entrypoint safer-test-image-no-entrypoint
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-no-entrypoint
+	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-no-entrypoint
 	diff tests/refs/persistent-no-entrypoint tests/outputs/persistent-no-entrypoint
 
 	# Persistent and simple entrypoint
 	./safer -k safer-test-container-bin persistent-bin safer-test-image-bin
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-bin
+	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-bin
 	diff tests/refs/persistent-bin tests/outputs/persistent-bin
 
 	# Persistent and sh entrypoint
 	./safer -k safer-test-container-sh persistent-sh safer-test-image-sh
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-sh
+	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-sh
 	diff tests/refs/persistent-sh tests/outputs/persistent-sh
 
 	# Persistent and sh entrypoint plus custom entrypoint, vols and port
 	./safer -p 10443 -e /bin/other_bin -k safer-test-container-complex persistent-complex safer-test-image-sh /vol/1 /vol/2
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-complex
+	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-complex
 	diff tests/refs/persistent-complex tests/outputs/persistent-complex
 
 	$test_runtime rmi safer-test-image-no-entrypoint > /dev/null
@@ -79,9 +87,11 @@ fi
 # Docker override
 SAFER_RT_CMD="docker" ./safer docker_rt a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/docker_rt
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/docker_rt
 diff tests/refs/docker_rt tests/outputs/docker_rt
 
 # Docker override (sudo + no args)
 SAFER_RT_CMD="sudo docker" SAFER_RT_ARGS="" ./safer docker_rt_sudo_no_args a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/docker_rt_sudo_no_args
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/docker_rt_sudo_no_args
 diff tests/refs/docker_rt_sudo_no_args tests/outputs/docker_rt_sudo_no_args
