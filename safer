@@ -19,6 +19,7 @@ Options:
  -p             Port to expose (e.g., 8080 or 80:8080).
  -k             Use this name to persist the container.
  -f             Force script replacement.
+ -s             Skip container pseudo-tty allocation.
  -v, --version  Display the current version.
  -h, --help     Display usage and exit.
 
@@ -54,7 +55,7 @@ esac
 safer_inf_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 safer_inf_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts vhe:p:k:d:R:X:K:S:f opt
+while getopts vhe:p:k:d:R:X:K:S:fs opt
 do
 	case $opt in
 		e) safer_entrypoint=$OPTARG ;;
@@ -66,6 +67,7 @@ do
 		K) safer_inf_cmd=$OPTARG ;;
 		S) safer_inf_stop_cmd=$OPTARG ;;
 		f) safer_force=1 ;;
+		s) safer_skip_tty=1 ;;
 		*) ;;
 	esac
 done
@@ -159,6 +161,9 @@ fi
 script_file=$(mktemp)
 cwd=$(pwd -P)
 
+interactive_flag=-ti
+[ "${safer_skip_tty+x}" ] && interactive_flag=-i
+
 {
 	printf '#!/bin/sh\n'
 
@@ -179,7 +184,7 @@ cwd=$(pwd -P)
 	if [ -n "$safer_inf" ]; then
 		printf '\t%s run --rm \\\n' "$safer_runtime_cmd"
 	else
-		printf '%s run --rm -ti \\\n' "$safer_runtime_cmd"
+		printf '%s run --rm %s \\\n' "$safer_runtime_cmd" "$interactive_flag"
 	fi
 
 	if [ -n "$safer_runtime_args" ]; then
@@ -220,7 +225,7 @@ cwd=$(pwd -P)
 
 	if [ -n "$safer_inf" ]; then
 		printf 'fi\n'
-			printf '%s exec -ti \\\n' "$safer_runtime_cmd"
+		printf '%s exec %s \\\n' "$safer_runtime_cmd" "$interactive_flag"
 		if [ -n "$safer_runtime_args" ]; then
 			printf '\t%s \\\n' "$safer_runtime_args"
 		fi

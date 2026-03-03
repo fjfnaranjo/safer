@@ -19,6 +19,6 @@ if ! podman container inspect safer-test-container-complex >/dev/null 2>&1; then
 		-d --name "safer-test-container-complex" \
 		safer-test-image-sh sleep inf
 fi
-podman exec -ti \
+podman exec -i \
 	-w "$(pwd -P)" \
 	safer-test-container-complex '/bin/other_bin' "$@"

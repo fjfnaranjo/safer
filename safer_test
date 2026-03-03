@@ -46,6 +46,12 @@ sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/entrypoint
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/entrypoint
 diff tests/refs/entrypoint tests/outputs/entrypoint
 
+# Skip pseudo-tty
+./safer -s skip-tty a_tool_image:latest
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/skip-tty
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/skip-tty
+diff tests/refs/skip-tty tests/outputs/skip-tty
+
 # Persistent containers
 if [ -n "$test_runtime" ]; then
 	if cd tests/image; then
@@ -73,8 +79,8 @@ if [ -n "$test_runtime" ]; then
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-sh
 	diff tests/refs/persistent-sh tests/outputs/persistent-sh
 
-	# Persistent and sh entrypoint plus custom entrypoint, vols and port
-	./safer -p 10443 -e /bin/other_bin -k safer-test-container-complex persistent-complex safer-test-image-sh /vol/1 /vol/2
+	# Persistent and sh entrypoint plus most of the flags
+	./safer -p 10443 -e /bin/other_bin -k safer-test-container-complex -s persistent-complex safer-test-image-sh /vol/1 /vol/2
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-complex
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-complex
 	diff tests/refs/persistent-complex tests/outputs/persistent-complex

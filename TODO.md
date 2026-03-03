@@ -1,10 +1,5 @@
 # safer TODO
 
-## LSP interaction
-
-For LSPs, container runtimes `-ti` replace the stdin pipe that the tools
-use for IPC. Add an `-s` option to [s]kip the pseudo-tty.
-
 ## safer library
 
 ### Default commands by tool

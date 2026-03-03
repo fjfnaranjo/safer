@@ -59,6 +59,9 @@ Argument injected to stop persisting containers. Default: --safer-stop .
 .BR \-f
 Force script replacement.
 .TP
+.BR \-s
+Skip container pseudo-tty allocation.
+.TP
 .BR \-v ", " \-\-version
 Display the current version.
 .TP
@@ -90,6 +93,9 @@ Shell used to run the sub-shell when no args are specified.
 .BR /etc/safer ", "~/.saferrc ", ".saferrc
 These files are sourced by safer.
 .SH NOTES
+.P
+RUNTIME DETECTION
+.P
 .B safer
 will try to detect a container runtime. It will prefer
 .B podman
@@ -104,3 +110,13 @@ If
 .B docker
 is selected, '--user "$(id -u):$(id -g)"' will be used as the default
 runtime arguments.
+.P
+PSEUDO-TTY ALLOCATION
+.P
+To ensure interactive tools can be used,
+.BR safer
+will instruct container runtimes to allocate a pseudo-tty by default.
+Set the flag
+.BR -s
+to skip this when using LSPs and similar tools that are controlled by
+another process using STDIN.
