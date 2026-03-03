@@ -16,9 +16,9 @@ pack:
 
 .PHONY: update-install-docs
 update-install-docs:
-	@test -n "$$SAFER_OLD_VERSION" && test -n "$$SAFER_VERSION"
-	@sed -i 's/release-$$SAFER_OLD_VERSION/release-$$SAFER_VERSION/g' README.md web/index.html
-	@sed -i 's/safer-$$SAFER_OLD_VERSION/safer-$$SAFER_VERSION/g' README.md web/index.html
+	@test -n "${SAFER_OLD_VERSION}" && test -n "${SAFER_VERSION}"
+	@sed -i 's/release-${SAFER_OLD_VERSION}/release-${SAFER_VERSION}/g' README.md web/index.html
+	@sed -i 's/safer-${SAFER_OLD_VERSION}/safer-${SAFER_VERSION}/g' README.md web/index.html
 
 .PHONY: clean
 clean:

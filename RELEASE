@@ -8,7 +8,7 @@
   - Download release .tar.gz
   - Get checksum: shasum -a 256 ...
   - Update:
-    - url
+    - url (2 places)
     - sha256
   - Commit message: Release <version>
 - Update and commit safer docs
