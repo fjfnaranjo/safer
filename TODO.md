@@ -1,5 +1,12 @@
 # safer TODO
 
+## General
+
+### -d for plain safer invocation
+
+Calling just `safer` to enter the sub-shell should support the `-d`
+argument.
+
 ## safer library
 
 ### Default commands by tool
