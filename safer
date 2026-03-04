@@ -38,7 +38,7 @@ if [ "$#" -eq 0 ]; then
 	case ":$PATH:" in
 		*":$safer_dir:"*) exit ;;
 		*)
-			if ! safer_abs=$(cd "$safer_dir" && pwd -P); then
+			if ! safer_abs=$(cd "$safer_dir" 2>/dev/null && pwd -P); then
 				echo "Cannot get an absolute path for '$safer_dir'."
 				exit 1
 			fi
