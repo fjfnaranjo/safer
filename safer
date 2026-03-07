@@ -42,7 +42,8 @@ if [ "$#" -eq 0 ]; then
 				echo "Cannot get an absolute path for '$safer_dir'."
 				exit 1
 			fi
-			PATH="$safer_abs:$PATH" exec "${SHELL:-sh}"
+			printf 'PATH="%s:$PATH"\n' "$safer_abs"
+			exit
 		;;
 	esac
 fi

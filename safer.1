@@ -14,20 +14,19 @@ container IMAGE.
 The current directory, and any extra DIR specified, are mounted in the
 container using the same paths.
 .P
-The scripts are created in the .safer directory. You can add this
-directory to your PATH or you can run
+The scripts are created in the
+.B .safer
+directory. You can run
 .B safer
-without any option to run a SHELL with a modified PATH.
+without any option to get a new definition for the
+.B PATH
+environment variable. You can also run
+.B 'eval $(safer)'
+to make the scripts available immediately.
 .P
-Optionally, instead of running a new container each time the CMD is
-called, you can specify a name for a container with
-.BR -k .
-If so, a named persistent container will be created by the script and
-the commands will execute using
-.BR exec,
-preserving the state of the container across executions. This container
-can be stopped using the CMD with the injected argument
-.BR --safer-stop.
+See
+.B NOTES
+for more details.
 .SH OPTIONS
 .TP
 .BR \-e
@@ -85,14 +84,23 @@ Command used to persist the container. Default: sleep inf .
 .TP
 .BR SAFER_PERSIST_STOP_CMD
 Argument injected to stop persisting containers. Default: --safer-stop .
-.TP
-.BR SHELL
-Shell used to run the sub-shell when no args are specified.
 .SH FILES
 .TP
 .BR /etc/safer ", "~/.saferrc ", ".saferrc
 These files are sourced by safer.
 .SH NOTES
+.P
+PERSISTENT CONTAINERS
+.P
+Instead of running a new container each time the CMD is called, you can
+specify a name for a container with
+.BR -k .
+If so, a named persistent container will be created by the script and
+the commands will execute using
+.BR exec,
+preserving the state of the container across executions. This container
+can be stopped using the CMD with the injected argument
+.BR --safer-stop.
 .P
 RUNTIME DETECTION
 .P

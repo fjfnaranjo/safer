@@ -4,7 +4,7 @@
 
 ### -d for plain safer invocation
 
-Calling just `safer` to enter the sub-shell should support the `-d`
+Calling just `safer` to make the PATH definition should support the `-d`
 argument.
 
 ## safer library

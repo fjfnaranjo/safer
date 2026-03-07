@@ -25,9 +25,11 @@ their platforms.
 - **Cleaner developer systems**: separation of general host software and
 project specific dev tools.
 
-The commands are created in the `.safer` directory. You can add this
-directory to your PATH or you can run `safer` without any option to run
-a sub-shell with a modified PATH.
+The scripts are created in the `.safer` directory. You can run `safer`
+without any option to get a new definition for the PATH environment
+variable (you can add this to your shell settings or use a tool like
+`direnv` to load it). You can also run `eval $(safer)` to make the
+scripts available immediately.
 ## Installing safer
 ### Linux
 Download and unpack the last safer release:
