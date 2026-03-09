@@ -62,11 +62,7 @@ if [ $# -gt 1 ]; then
 	safer_image="$2"
 	shift 2
 elif [ $# -eq 0 ]; then
-	if ! safer_abs=$(cd "$safer_dir" 2>/dev/null && pwd -P); then
-		echo "Cannot get an absolute path for '$safer_dir'."
-		exit 1
-	fi
-	printf 'PATH="%s:$PATH"\n' "$safer_abs"
+	printf 'PATH="%s:$PATH"\n' "$safer_dir"
 	exit
 else
 	echo "$safer_usage"

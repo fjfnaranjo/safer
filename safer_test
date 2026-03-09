@@ -6,15 +6,15 @@ rm -rf tests/outputs
 mkdir -p tests/outputs
 
 # PATH definition
-test "PATH=\"$(pwd -P)/.safer:\$PATH\"" = "$(./safer)"
+test "PATH=\".safer:\$PATH\"" = "$(./safer)"
 
 # PATH definition with -d
-test "PATH=\"$(pwd -P)/tests:\$PATH\"" = "$(./safer -d tests)"
+test "PATH=\"tests:\$PATH\"" = "$(./safer -d tests)"
 
 export SAFER_DIR=tests/outputs
 
 # PATH definition with env var
-test "PATH=\"$(pwd -P)/tests/outputs:\$PATH\"" = "$(./safer)"
+test "PATH=\"tests/outputs:\$PATH\"" = "$(./safer)"
 
 if command -v podman >/dev/null 2>&1; then
 	test_runtime=podman
