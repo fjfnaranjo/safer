@@ -129,3 +129,11 @@ Set the flag
 .BR -s
 to skip this when using LSPs and similar tools that are controlled by
 another process using STDIN.
+.SH CAVEATS
+.P
+PHYSICAL/ABSOLUTE PATHS
+.P
+.B safer
+enforces absolute paths in scripts generation. This is coherent with
+how container runtimes work but may break host tools if they need path
+information from inside the container.
