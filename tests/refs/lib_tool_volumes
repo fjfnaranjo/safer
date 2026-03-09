@@ -1,0 +1,12 @@
+#!/bin/sh
+project_dir="CWD"
+case "$(pwd -P)/" in
+	"$project_dir/"*) ;;
+	*) echo "safer: $0: outside project dir" 2>&1; exit 1 ;;
+esac
+podman run --rm -ti \
+	-v "CWD":"CWD" \
+	-w "$(pwd -P)" \
+	-v "/vol/1":"/vol/1" \
+	-v "/vol/2":"/vol/2" \
+	lib_tool_volumes_image:latest "$@"

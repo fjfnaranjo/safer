@@ -1,0 +1,10 @@
+#!/bin/sh
+project_dir="CWD"
+case "$(pwd -P)/" in
+	"$project_dir/"*) ;;
+	*) echo "safer: $0: outside project dir" 2>&1; exit 1 ;;
+esac
+podman run --rm -ti \
+	-v "CWD":"CWD" \
+	-w "$(pwd -P)" \
+	lib_tool_image:latest "$@"

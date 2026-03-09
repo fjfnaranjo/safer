@@ -100,6 +100,24 @@ if [ -n "$test_runtime" ]; then
 	$test_runtime rmi safer-test-image-sh > /dev/null
 fi
 
+export SAFER_LIB_PATH=tests/lib
+
+# Library tool
+./safer -l lib_tool
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool
+diff tests/refs/lib_tool tests/outputs/lib_tool
+
+# Library tool with extra volumes /vol/1 /vol/2
+./safer -l lib_tool_volumes /vol/1 /vol/2
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_volumes
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool_volumes
+diff tests/refs/lib_tool_volumes tests/outputs/lib_tool_volumes
+
+# Library image
+./safer -i lib_tool
+diff tests/lib/images/lib_tool tests/outputs/build/lib_tool
+
 # Docker override
 SAFER_RT_CMD="docker" ./safer docker_rt a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/docker_rt
