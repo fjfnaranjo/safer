@@ -1,12 +1,5 @@
 # safer TODO
 
-## General
-
-### -d for plain safer invocation
-
-Calling just `safer` to make the PATH definition should support the `-d`
-argument.
-
 ## safer library
 
 ### Default commands by tool

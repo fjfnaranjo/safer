@@ -1,7 +1,5 @@
 #!/bin/sh
 
-# Section 1: Init safer and read args/env
-
 safer_ver=0.0-dev
 
 safer_usage="Usage:
@@ -15,50 +13,34 @@ Arguments:
 For the full list of Options and Environment Vars, see the man page.
 
 Options:
- -e             Tool entrypoint in the image.
- -p             Port to expose (e.g., 8080 or 80:8080).
- -k             Use this name to persist the container.
- -f             Force script replacement.
- -s             Skip container pseudo-tty allocation.
- -v, --version  Display the current version.
- -h, --help     Display usage and exit.
+ -e          Tool entrypoint in the image.
+ -p          Port to expose (e.g., 8080 or 80:8080).
+ -k          Use this name to persist the container.
+ -f          Force script replacement.
+ -s          Skip container pseudo-tty allocation.
+ -v          Display the current version.
+ -h          Display usage and exit.
 
 Environment Vars:
  SAFER_DIR      Directory for the scripts. Default .safer .
 
 Config files: /etc/safer, ~/.saferrc, .saferrc"
 
+# Section 1: Init safer and read args/env
+
 [ -e "/etc/safer" ] && . "/etc/safer"
 [ -e "$HOME/.saferrc" ] && . "$HOME/.saferrc"
 [ -e ".saferrc" ] && . ".saferrc"
 
 safer_dir=${SAFER_DIR:-.safer}
-
-if [ "$#" -eq 0 ]; then
-	case ":$PATH:" in
-		*":$safer_dir:"*) exit ;;
-		*)
-			if ! safer_abs=$(cd "$safer_dir" 2>/dev/null && pwd -P); then
-				echo "Cannot get an absolute path for '$safer_dir'."
-				exit 1
-			fi
-			printf 'PATH="%s:$PATH"\n' "$safer_abs"
-			exit
-		;;
-	esac
-fi
-
-case " $@ " in
-	*" -v "*|*" --version "*) echo $safer_ver && exit ;;
-	*" -h "*|*" --help "*) echo "$safer_usage" && exit ;;
-esac
-
 safer_inf_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 safer_inf_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
 while getopts vhe:p:k:d:R:X:K:S:fs opt
 do
 	case $opt in
+		v) echo $safer_ver && exit ;;
+		h) echo "$safer_usage" && exit ;;
 		e) safer_entrypoint=$OPTARG ;;
 		p) safer_port=$OPTARG ;;
 		k) safer_inf=$OPTARG ;;
@@ -79,9 +61,16 @@ if [ $# -gt 1 ]; then
 	safer_cmd="$1"
 	safer_image="$2"
 	shift 2
+elif [ $# -eq 0 ]; then
+	if ! safer_abs=$(cd "$safer_dir" 2>/dev/null && pwd -P); then
+		echo "Cannot get an absolute path for '$safer_dir'."
+		exit 1
+	fi
+	printf 'PATH="%s:$PATH"\n' "$safer_abs"
+	exit
 else
 	echo "$safer_usage"
-	exit
+	exit 1
 fi
 
 # Section 2: Preprocessing of variables

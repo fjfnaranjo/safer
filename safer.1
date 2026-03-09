@@ -3,6 +3,7 @@
 safer \- run project tools in containers using proxy scripts
 .SH SYNOPSIS
 .B safer
+[-d SAFER_DIR]
 .br
 .B safer
 [OPTIONS] <CMD> <IMAGE> [DIR...]
@@ -14,9 +15,9 @@ container IMAGE.
 The current directory, and any extra DIR specified, are mounted in the
 container using the same paths.
 .P
-The scripts are created in the
+The scripts are created in the SAFER_DIR directory,
 .B .safer
-directory. You can run
+by default. You can run
 .B safer
 without any option to get a new definition for the
 .B PATH
@@ -61,10 +62,10 @@ Force script replacement.
 .BR \-s
 Skip container pseudo-tty allocation.
 .TP
-.BR \-v ", " \-\-version
+.BR \-v
 Display the current version.
 .TP
-.BR \-h ", " \-\-help
+.BR \-h
 Display usage and exit.
 .SH ENVIRONMENT
 .TP
