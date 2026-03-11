@@ -147,6 +147,13 @@ fi
 test "$out" = "not_a_lib_tool tool not found in library."
 
 # ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Library item in alternative location..."
+SAFER_LIB_PATH=tests/lib:tests/lib2 ./safer -l lib_tool_alt
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_alt
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool_alt
+diff tests/refs/lib_tool tests/outputs/lib_tool_alt
+
+# ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Library tool with extra volumes /vol/1 /vol/2..."
 ./safer -l lib_tool_volumes /vol/1 /vol/2
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_volumes

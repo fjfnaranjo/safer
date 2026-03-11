@@ -72,22 +72,19 @@ if [ $# -gt 0 ] && { [ "${lib_tool+x}" ] || [ "${lib_image+x}" ]; }; then
 	shift 1
 
 	find_item_in_lib() {
-		subdir="$2"
-		item="$3"
 		oldifs=$IFS
 		IFS=:
-		set -- "$1"
-		IFS=$oldifs
-		for location; do
-			if [ -e "$location/$subdir/$item" ]; then
-				echo "$location/$subdir/$item"
+		for location in $lib_path; do
+			if [ -e "$location/$1/$item" ]; then
+				echo "$location/$1/$item"
 				break
 			fi
 		done
+		IFS=$oldifs
 	}
 
 	if [ "${lib_tool+x}" ]; then
-		found=$(find_item_in_lib "$lib_path" tools "$item")
+		found=$(find_item_in_lib tools)
 		if [ -n "$found" ]; then
 			sh "$found" "$@"
 		else
@@ -97,7 +94,7 @@ if [ $# -gt 0 ] && { [ "${lib_tool+x}" ] || [ "${lib_image+x}" ]; }; then
 	fi
 
 	if [ "${lib_image+x}" ]; then
-		found=$(find_item_in_lib "$lib_path" images "$item")
+		found=$(find_item_in_lib images)
 		if [ -n "$found" ]; then
 			if [ -e "$script_dir/build/$item" ]; then
 				echo "$script_dir/build/$item already exists."
