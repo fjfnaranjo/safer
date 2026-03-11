@@ -58,6 +58,7 @@ do
 		i) lib_image=1 ;;
 		v) echo $version && exit ;;
 		h) echo "$usage" && exit ;;
+		\?) echo "$usage" && exit 1 ;;
 		*) ;;
 	esac
 done

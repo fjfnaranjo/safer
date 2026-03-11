@@ -23,6 +23,12 @@ elif command -v docker >/dev/null 2>&1; then
 fi
 
 # ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Illegal option..."
+if out=$(./safer -Z 2> /dev/null); then
+	exit 1
+fi
+
+# ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Invalid call not detected by optargs..."
 if out=$(./safer only_one_arg); then
 	exit 1
