@@ -149,8 +149,19 @@ diff tests/refs/lib_tool_volumes tests/outputs/lib_tool_volumes
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Library image..."
-./safer -i lib_tool
+expected=$(mktemp)
+actual=$(mktemp)
+cat > "$expected" <<EOF
+Build script was installed. Review and build with:
+cat "tests/outputs/build/lib_tool"
+(podman|docker) build -t "safer-lib_tool:latest" -f "lib_tool" "tests/outputs/build"
+EOF
+./safer -i lib_tool > "$actual"
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/build/lib_tool
 diff tests/lib/images/lib_tool tests/outputs/build/lib_tool
+diff "$expected" "$actual"
+rm "$expected"
+rm "$actual"
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Missing library image..."

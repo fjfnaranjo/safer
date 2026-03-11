@@ -104,6 +104,9 @@ if [ $# -gt 0 ] && [ "${lib_tool+x}" ] || [ "${lib_image+x}" ]; then
 			else
 				mkdir -p "$script_dir/build"
 				cp "$found" "$script_dir/build/$item"
+				echo "Build script was installed. Review and build with:"
+				printf 'cat "%s"\n' "$script_dir/build/$item"
+				printf '(podman|docker) build -t "safer-%s:latest" -f "%s" "%s"\n' "$item" "$item" "$script_dir/build"
 			fi
 		else
 			echo "$item image not found in library."
@@ -185,6 +188,7 @@ done
 # Capture original image entrypoint and args
 if [ -n "$container_name" ] && [ -z "$entrypoint" ]; then
 	set -f
+	oldifs=$IFS
 	IFS='
 '
 	# shellcheck disable=SC2046
@@ -193,7 +197,7 @@ if [ -n "$container_name" ] && [ -z "$entrypoint" ]; then
 		--format '{{range .Config.Entrypoint}}{{println .}}{{end}}' \
 		"$image"
 	)
-	unset IFS
+	IFS=$oldifs
 
 	if [ $# -gt 0 ]; then
 		og_entrypoint=$1
