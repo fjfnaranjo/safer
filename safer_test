@@ -22,46 +22,54 @@ elif command -v docker >/dev/null 2>&1; then
 	test_runtime=docker
 fi
 
-# Invalid call not detected by optargs
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Invalid call not detected by optargs..."
 if out=$(./safer only_one_arg); then
 	exit 1
 fi
 
-# Basic generation
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Basic generation..."
 ./safer basic a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/basic
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/basic
 diff tests/refs/basic tests/outputs/basic
 
-# Target other dir and use underscores
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Target other dir and use underscores..."
 ./safer -d tests/outputs/alt dest a_tool_image:latest
 test -e "tests/outputs/alt/dest"
 
-# Don't replace existing scripts
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Don't replace existing scripts..."
 if out=$(./safer basic same_tool_image:latest); then
 	exit 1
 fi
 test "$out" = "tests/outputs/basic already exists."
 
-# Generation with port
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Generation with port..."
 ./safer -p 10443 port a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/port
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/port
 diff tests/refs/port tests/outputs/port
 
-# Extra volumes
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Extra volumes..."
 ./safer volumes a_tool_image:latest /vol/1 /vol/2
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/volumes
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/volumes
 diff tests/refs/volumes tests/outputs/volumes
 
-# Custom entrypoint
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Custom entrypoint..."
 ./safer -e /bin/other_bin entrypoint a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/entrypoint
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/entrypoint
 diff tests/refs/entrypoint tests/outputs/entrypoint
 
-# Skip pseudo-tty
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Skip pseudo-tty..."
 ./safer -s skip-tty a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/skip-tty
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/skip-tty
@@ -76,31 +84,36 @@ if [ -n "$test_runtime" ]; then
 		cd - > /dev/null
 	fi
 
-	# Persistent
+	# ---- TEST CASE ----
+	[ "$1" = "verbose" ] && echo "Persistent..."
 	./safer -k persistent safer-test-image-no-entrypoint
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent
 	diff tests/refs/persistent tests/outputs/persistent
 
-	# Persistent and named
+	# ---- TEST CASE ----
+	[ "$1" = "verbose" ] && echo "Persistent and named..."
 	./safer -k -n safer-test-container-named persistent-named safer-test-image-no-entrypoint
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-named
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-named
 	diff tests/refs/persistent-named tests/outputs/persistent-named
 
-	# Persistent and simple entrypoint
+	# ---- TEST CASE ----
+	[ "$1" = "verbose" ] && echo "Persistent and simple entrypoint..."
 	./safer -n safer-test-container-bin persistent-bin safer-test-image-bin
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-bin
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-bin
 	diff tests/refs/persistent-bin tests/outputs/persistent-bin
 
-	# Persistent and sh entrypoint
+	# ---- TEST CASE ----
+	[ "$1" = "verbose" ] && echo "Persistent and sh entrypoint..."
 	./safer -n safer-test-container-sh persistent-sh safer-test-image-sh
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-sh
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-sh
 	diff tests/refs/persistent-sh tests/outputs/persistent-sh
 
-	# Persistent and sh entrypoint plus most of the flags
+	# ---- TEST CASE ----
+	[ "$1" = "verbose" ] && echo "Persistent and sh entrypoint plus most of the flags..."
 	./safer -p 10443 -e /bin/other_bin -n safer-test-container-complex -s persistent-complex safer-test-image-sh /vol/1 /vol/2
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-complex
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-complex
@@ -113,47 +126,55 @@ fi
 
 export SAFER_LIB_PATH=tests/lib
 
-# Library tool
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Library tool..."
 ./safer -l lib_tool
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool
 diff tests/refs/lib_tool tests/outputs/lib_tool
 
-# Missing library tool
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Missing library tool..."
 if out=$(./safer -l not_a_lib_tool); then
 	exit 1
 fi
 test "$out" = "not_a_lib_tool tool not found in library."
 
-# Library tool with extra volumes /vol/1 /vol/2
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Library tool with extra volumes /vol/1 /vol/2..."
 ./safer -l lib_tool_volumes /vol/1 /vol/2
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_volumes
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool_volumes
 diff tests/refs/lib_tool_volumes tests/outputs/lib_tool_volumes
 
-# Library image
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Library image..."
 ./safer -i lib_tool
 diff tests/lib/images/lib_tool tests/outputs/build/lib_tool
 
-# Missing library image
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Missing library image..."
 if out=$(./safer -i not_a_lib_image); then
 	exit 1
 fi
 test "$out" = "not_a_lib_image image not found in library."
 
-# Don't replace build file from library
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Don't replace build file from library..."
 if out=$(./safer -i lib_tool); then
 	exit 1
 fi
 test "$out" = "tests/outputs/build/lib_tool already exists."
 
-# Docker override
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Docker override..."
 SAFER_RT_CMD="docker" ./safer docker_rt a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/docker_rt
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/docker_rt
 diff tests/refs/docker_rt tests/outputs/docker_rt
 
-# Docker override (sudo + no args)
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Docker override (sudo + no args)..."
 SAFER_RT_CMD="sudo docker" SAFER_RT_ARGS="" ./safer docker_rt_sudo_no_args a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/docker_rt_sudo_no_args
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/docker_rt_sudo_no_args

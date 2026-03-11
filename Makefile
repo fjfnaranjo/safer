@@ -7,6 +7,10 @@ check:
 test:
 	@./safer_test
 
+.PHONY: test-verbose
+test-verbose:
+	@./safer_test verbose
+
 .PHONY: pack
 pack:
 	@install -Dm755 safer "dist/safer-$${SAFER_VERSION:-0.0-dev}/bin/safer"
