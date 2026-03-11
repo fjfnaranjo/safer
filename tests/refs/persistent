@@ -5,17 +5,17 @@ case "$(pwd -P)/" in
 	*) echo "safer: $0: outside project dir" 2>&1; exit 1 ;;
 esac
 if [ "$*" = "--safer-stop" ]; then
-	podman kill safer-test-container-no-entrypoint
+	podman kill persistent-safer
 	exit
 fi
-if ! podman container inspect safer-test-container-no-entrypoint >/dev/null 2>&1; then
+if ! podman container inspect persistent-safer >/dev/null 2>&1; then
 	podman run --rm \
 		--entrypoint '' \
 		-v "CWD":"CWD" \
 		-w "$project_dir" \
-		-d --name "safer-test-container-no-entrypoint" \
+		-d --name "persistent-safer" \
 		safer-test-image-no-entrypoint sleep inf
 fi
 podman exec -ti \
 	-w "$(pwd -P)" \
-	safer-test-container-no-entrypoint "$@"
+	persistent-safer "$@"

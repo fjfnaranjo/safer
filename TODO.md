@@ -1,12 +1,5 @@
 # safer TODO
 
-## General
-
-### Default name for persistent containers
-
-Modify `safer` so that a plain `-k` argument will auto calculate the name
-of the persistent containers and `-n` specifies the custom name.
-
 ## safer library
 
 ### Library items overrides

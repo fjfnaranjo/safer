@@ -48,7 +48,12 @@ Tool entrypoint in the image.
 Port to expose (e.g., 8080 or 80:8080).
 .TP
 .BR \-k
-Use this name to persist the container.
+Run the tool in a persistent container.
+.TP
+.BR \-n
+Use this name to persist the container (implies 
+.BR -k
+).
 .TP
 .BR \-d
 Directory for the scripts. Default: .safer .
@@ -122,7 +127,9 @@ directories used by the library options.
 PERSISTENT CONTAINERS
 .P
 Instead of running a new container each time the CMD is called, you can
-specify a name for a container with
+run
+.BR safer
+with
 .BR -k .
 If so, a named persistent container will be created by the script and
 the commands will execute using
@@ -130,6 +137,8 @@ the commands will execute using
 preserving the state of the container across executions. This container
 can be stopped using the CMD with the injected argument
 .BR --safer-stop.
+You can specify a name for the container with
+.BR -n .
 .P
 RUNTIME DETECTION
 .P

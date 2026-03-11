@@ -15,7 +15,8 @@ For the full list of Options and Environment Vars, see the man page.
 Options:
  -e          Tool entrypoint in the image.
  -p          Port to expose (e.g., 8080 or 80:8080).
- -k          Use this name to persist the container.
+ -k          Run the tool in a persistent container.
+ -n          Use this name to persist the container (implies -k).
  -f          Force script replacement.
  -s          Skip container pseudo-tty allocation.
  -l          Get the tool definition from the library.
@@ -39,12 +40,13 @@ safer_lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/loca
 safer_inf_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 safer_inf_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts e:p:k:d:R:X:K:S:fslivh opt
+while getopts e:p:kn:d:R:X:K:S:fslivh opt
 do
 	case $opt in
 		e) safer_entrypoint=$OPTARG ;;
 		p) safer_port=$OPTARG ;;
-		k) safer_inf=$OPTARG ;;
+		k) safer_persist=1 ;;
+		n) safer_cname=$OPTARG ;;
 		d) safer_dir=$OPTARG ;;
 		R) safer_runtime_cmd=$OPTARG ;;
 		X) safer_opts_runtime_args=$OPTARG ;;
@@ -125,6 +127,11 @@ if [ -n "$safer_port" ]; then
 	esac
 fi
 
+if [ "${safer_persist+x}" ] && [ -z "$safer_cname" ]; then
+	safer_cname_dir="$(echo "${PWD##*/}" | tr -cd '[:alnum:]')"
+	safer_cname="$safer_cmd-$safer_cname_dir"
+fi
+
 if [ -z "${safer_runtime_cmd:=$SAFER_RT_CMD}" ]; then
 	if command -v podman >/dev/null 2>&1; then
 		safer_runtime_cmd=podman
@@ -146,7 +153,7 @@ fi
 
 # Section 5: Preprocessing of the original entrypoint parts
 
-if [ -n "$safer_inf" ]; then
+if [ -n "$safer_cname" ]; then
 	pad='\t'  # indent the original run lines on persistent scripts
 fi
 
@@ -158,7 +165,7 @@ for arg in "$@"; do
 done
 
 # Capture original image entrypoint and args
-if [ -n "$safer_inf" ] && [ -z "$safer_entrypoint" ]; then
+if [ -n "$safer_cname" ] && [ -z "$safer_entrypoint" ]; then
 	set -f
 	IFS='
 '
@@ -200,15 +207,15 @@ interactive_flag=-ti
 	printf '\t*) echo "safer: $0: outside project dir" 2>&1; exit 1 ;;\n'
 	printf 'esac\n'
 
-	if [ -n "$safer_inf" ]; then
+	if [ -n "$safer_cname" ]; then
 		printf 'if [ "$*" = "%s" ]; then\n' "$safer_inf_stop_cmd"
-		printf '\t%s kill %s\n' "$safer_runtime_cmd" "$safer_inf"
+		printf '\t%s kill %s\n' "$safer_runtime_cmd" "$safer_cname"
 		printf '\texit\n'
 		printf 'fi\n'
-		printf 'if ! %s container inspect %s >/dev/null 2>&1; then\n' "$safer_runtime_cmd" "$safer_inf"
+		printf 'if ! %s container inspect %s >/dev/null 2>&1; then\n' "$safer_runtime_cmd" "$safer_cname"
 	fi
 
-	if [ -n "$safer_inf" ]; then
+	if [ -n "$safer_cname" ]; then
 		printf '\t%s run --rm \\\n' "$safer_runtime_cmd"
 	else
 		printf '%s run --rm %s \\\n' "$safer_runtime_cmd" "$interactive_flag"
@@ -218,7 +225,7 @@ interactive_flag=-ti
 		printf '%b\t%s \\\n' "$pad" "$safer_runtime_args"
 	fi
 
-	if [ -n "$safer_inf" ]; then
+	if [ -n "$safer_cname" ]; then
 		printf '\t\t--entrypoint '\'''\'' \\\n'
 	elif [ -n "$safer_entrypoint" ]; then
 		printf '\t--entrypoint '\''%s'\'' \\\n' "$safer_entrypoint"
@@ -230,7 +237,7 @@ interactive_flag=-ti
 
 	printf '%b\t-v "%s":"%s" \\\n' "$pad" "$cwd" "$cwd"
 
-	if [ -n "$safer_inf" ]; then
+	if [ -n "$safer_cname" ]; then
 		printf '\t\t-w "$project_dir"'
 	else
 		printf '\t-w "$(pwd -P)"'
@@ -238,19 +245,19 @@ interactive_flag=-ti
 
 	printf '%s' "$extra_volumes"
 
-	if [ -n "$safer_inf" ]; then
-		printf ' \\\n\t\t-d --name "%s" \\\n' "$safer_inf"
+	if [ -n "$safer_cname" ]; then
+		printf ' \\\n\t\t-d --name "%s" \\\n' "$safer_cname"
 	else
 		printf ' \\\n'
 	fi
 
-	if [ -n "$safer_inf" ]; then
+	if [ -n "$safer_cname" ]; then
 		printf '\t\t%s %s\n' "$safer_image" "$safer_inf_cmd"
 	else
 		printf '\t%s "$@"\n' "$safer_image"
 	fi
 
-	if [ -n "$safer_inf" ]; then
+	if [ -n "$safer_cname" ]; then
 		printf 'fi\n'
 		printf '%s exec %s \\\n' "$safer_runtime_cmd" "$interactive_flag"
 		if [ -n "$safer_runtime_args" ]; then
@@ -258,14 +265,14 @@ interactive_flag=-ti
 		fi
 		printf '\t-w "$(pwd -P)" \\\n'
 		if [ -n "$safer_entrypoint" ]; then
-			printf '\t%s '\''%s'\'' "$@"\n' "$safer_inf" "$safer_entrypoint"
+			printf '\t%s '\''%s'\'' "$@"\n' "$safer_cname" "$safer_entrypoint"
 		else
 			if [ -z "$og_entrypoint" ]; then
-				printf '\t%s "$@"\n' "$safer_inf"
+				printf '\t%s "$@"\n' "$safer_cname"
 			elif [ -z "$og_exec_args" ]; then
-				printf '\t%s '\''%s'\'' "$@"\n' "$safer_inf" "$og_entrypoint"
+				printf '\t%s '\''%s'\'' "$@"\n' "$safer_cname" "$og_entrypoint"
 			else
-				printf '\t%s '\''%s'\'' %s "$@"\n' "$safer_inf" "$og_entrypoint" "$og_exec_args"
+				printf '\t%s '\''%s'\'' %s "$@"\n' "$safer_cname" "$og_entrypoint" "$og_exec_args"
 			fi
 		fi
 	fi

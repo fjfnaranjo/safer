@@ -71,26 +71,32 @@ if [ -n "$test_runtime" ]; then
 		cd - > /dev/null
 	fi
 
-	# Persistent and no entrypoint
-	./safer -k safer-test-container-no-entrypoint persistent-no-entrypoint safer-test-image-no-entrypoint
-	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-no-entrypoint
-	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-no-entrypoint
-	diff tests/refs/persistent-no-entrypoint tests/outputs/persistent-no-entrypoint
+	# Persistent
+	./safer -k persistent safer-test-image-no-entrypoint
+	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent
+	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent
+	diff tests/refs/persistent tests/outputs/persistent
+
+	# Persistent and named
+	./safer -k -n safer-test-container-named persistent-named safer-test-image-no-entrypoint
+	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-named
+	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-named
+	diff tests/refs/persistent-named tests/outputs/persistent-named
 
 	# Persistent and simple entrypoint
-	./safer -k safer-test-container-bin persistent-bin safer-test-image-bin
+	./safer -n safer-test-container-bin persistent-bin safer-test-image-bin
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-bin
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-bin
 	diff tests/refs/persistent-bin tests/outputs/persistent-bin
 
 	# Persistent and sh entrypoint
-	./safer -k safer-test-container-sh persistent-sh safer-test-image-sh
+	./safer -n safer-test-container-sh persistent-sh safer-test-image-sh
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-sh
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-sh
 	diff tests/refs/persistent-sh tests/outputs/persistent-sh
 
 	# Persistent and sh entrypoint plus most of the flags
-	./safer -p 10443 -e /bin/other_bin -k safer-test-container-complex -s persistent-complex safer-test-image-sh /vol/1 /vol/2
+	./safer -p 10443 -e /bin/other_bin -n safer-test-container-complex -s persistent-complex safer-test-image-sh /vol/1 /vol/2
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-complex
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-complex
 	diff tests/refs/persistent-complex tests/outputs/persistent-complex
