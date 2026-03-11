@@ -36,9 +36,9 @@ Download and unpack the last safer release:
 
 ```
 cd /tmp
-curl -LO https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc5/safer-0.1-rc5.tar.gz
-tar -xzf safer-0.1-rc5.tar.gz
-cd safer-0.1-rc5
+curl -LO https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc7/safer-0.1-rc7.tar.gz
+tar -xzf safer-0.1-rc7.tar.gz
+cd safer-0.1-rc7
 ```
 
 Install the files for your user (if you have `~/.local/bin` in your **PATH**):
@@ -46,6 +46,9 @@ Install the files for your user (if you have `~/.local/bin` in your **PATH**):
 ```
 install -Dm755 bin/safer ~/.local/bin/safer
 install -Dm644 share/man/man1/safer.1 ~/.local/share/man/man1/safer.1
+install -dm755 ~/.local/share/safer/tools ~/.local/share/safer/images
+install -Dm644 share/safer/tools/* ~/.local/share/safer/tools/
+install -Dm644 share/safer/images/* ~/.local/share/safer/images/
 ```
 
 Or install them in the system:
@@ -53,6 +56,9 @@ Or install them in the system:
 ```
 sudo install -Dm755 bin/safer /usr/local/bin/safer
 sudo install -Dm644 share/man/man1/safer.1 /usr/local/share/man/man1/safer.1
+sudo install -dm755 /usr/local/share/safer/tools /usr/local/share/safer/images
+sudo install -Dm644 share/safer/tools/* /usr/local/share/safer/tools/
+sudo install -Dm644 share/safer/images/* /usr/local/share/safer/images/
 ```
 ### MacOS
 Use Homebrew:
