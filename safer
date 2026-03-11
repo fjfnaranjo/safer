@@ -67,7 +67,7 @@ shift $((OPTIND - 1))
 
 # Section 2: Library commands
 
-if [ $# -gt 0 ] && [ "${lib_tool+x}" ] || [ "${lib_image+x}" ]; then
+if [ $# -gt 0 ] && { [ "${lib_tool+x}" ] || [ "${lib_image+x}" ]; }; then
 	item="$1"
 	shift 1
 
