@@ -54,7 +54,9 @@ Run the tool in a persistent container.
 Use this name to persist the container (implies -k).
 .TP
 .BR \-d
-Directory for the scripts. Default: .safer .
+Directory for the scripts.
+.br
+Default: .safer
 .TP
 .BR \-R
 Runtime cli command. Override podman/docker detection.
@@ -62,13 +64,17 @@ Runtime cli command. Override podman/docker detection.
 .BR \-X
 Runtime extra args.
 .br
-Docker default: '--user "$(id -u):$(id -g)"'.
+Docker default: --user "$(id -u):$(id -g)"
 .TP
 .BR \-K
-Command used to persist the container (implies -k). Default: sleep inf .
+Command used to persist the container (implies -k).
+.br
+Default: sleep inf
 .TP
 .BR \-S
-Argument injected to stop persisting containers (implies -k). Default: --safer-stop .
+Argument injected to stop persisting containers (implies -k).
+.br
+Default: --safer-stop
 .TP
 .BR \-f
 Force script replacement.
@@ -90,7 +96,9 @@ Display usage and exit.
 .SH ENVIRONMENT
 .TP
 .BR SAFER_DIR
-Directory for the scripts. Default: .safer .
+Directory for the scripts.
+.br
+Default: .safer
 .TP
 .BR SAFER_LIB_PATH
 Directories for the library. See
@@ -105,10 +113,14 @@ Runtime extra args. See
 .BR NOTES.
 .TP
 .BR SAFER_PERSIST_CMD
-Command used to persist the container. Default: sleep inf .
+Command used to persist the container.
+.br
+Default: sleep inf
 .TP
 .BR SAFER_PERSIST_STOP_CMD
-Argument injected to stop persisting containers. Default: --safer-stop .
+Argument injected to stop persisting containers.
+.br
+Default: --safer-stop
 .SH FILES
 .TP
 .BR /etc/safer ", "~/.saferrc ", ".saferrc
