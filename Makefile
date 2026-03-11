@@ -22,5 +22,5 @@ update-install-docs:
 
 .PHONY: clean
 clean:
-	rm -rf tests/outputs
-	rm -rf dist
+	@rm -rf tests/outputs
+	@rm -rf dist
