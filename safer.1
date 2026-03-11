@@ -51,9 +51,7 @@ Port to expose (e.g., 8080 or 80:8080).
 Run the tool in a persistent container.
 .TP
 .BR \-n
-Use this name to persist the container (implies 
-.BR -k
-).
+Use this name to persist the container (implies -k).
 .TP
 .BR \-d
 Directory for the scripts. Default: .safer .
@@ -67,10 +65,10 @@ Runtime extra args.
 Docker default: '--user "$(id -u):$(id -g)"'.
 .TP
 .BR \-K
-Command used to persist the container. Default: sleep inf .
+Command used to persist the container (implies -k). Default: sleep inf .
 .TP
 .BR \-S
-Argument injected to stop persisting containers. Default: --safer-stop .
+Argument injected to stop persisting containers (implies -k). Default: --safer-stop .
 .TP
 .BR \-f
 Force script replacement.

@@ -46,12 +46,12 @@ do
 		e) entrypoint=$OPTARG ;;
 		p) port=$OPTARG ;;
 		k) persist=1 ;;
-		n) container_name=$OPTARG ;;
+		n) container_name=$OPTARG; persist=1 ;;
 		d) script_dir=$OPTARG ;;
 		R) runtime_cmd=$OPTARG ;;
 		X) runtime_args=$OPTARG ;;
-		K) persist_cmd=$OPTARG ;;
-		S) persist_stop_cmd=$OPTARG ;;
+		K) persist_cmd=$OPTARG; persist=1 ;;
+		S) persist_stop_cmd=$OPTARG; persist=1 ;;
 		f) force=1 ;;
 		s) skip_tty=1 ;;
 		l) lib_tool=1 ;;
