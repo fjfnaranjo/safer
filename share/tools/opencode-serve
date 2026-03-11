@@ -1,0 +1,1 @@
+safer -s -p 4096 -K serve opencode ghcr.io/anomalyco/opencode
