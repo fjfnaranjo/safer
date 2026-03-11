@@ -22,6 +22,11 @@ elif command -v docker >/dev/null 2>&1; then
 	test_runtime=docker
 fi
 
+# Invalid call not detected by optargs
+if out=$(./safer only_one_arg); then
+	exit 1
+fi
+
 # Basic generation
 ./safer basic a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/basic
@@ -33,10 +38,10 @@ diff tests/refs/basic tests/outputs/basic
 test -e "tests/outputs/alt/dest"
 
 # Don't replace existing scripts
-if ./safer basic same_tool_image:latest > /dev/null; then
+if out=$(./safer basic same_tool_image:latest); then
 	exit 1
 fi
-diff tests/refs/basic tests/outputs/basic
+test "$out" = "tests/outputs/basic already exists."
 
 # Generation with port
 ./safer -p 10443 port a_tool_image:latest
@@ -114,6 +119,12 @@ sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool
 [ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool
 diff tests/refs/lib_tool tests/outputs/lib_tool
 
+# Missing library tool
+if out=$(./safer -l not_a_lib_tool); then
+	exit 1
+fi
+test "$out" = "not_a_lib_tool tool not found in library."
+
 # Library tool with extra volumes /vol/1 /vol/2
 ./safer -l lib_tool_volumes /vol/1 /vol/2
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_volumes
@@ -123,6 +134,18 @@ diff tests/refs/lib_tool_volumes tests/outputs/lib_tool_volumes
 # Library image
 ./safer -i lib_tool
 diff tests/lib/images/lib_tool tests/outputs/build/lib_tool
+
+# Missing library image
+if out=$(./safer -i not_a_lib_image); then
+	exit 1
+fi
+test "$out" = "not_a_lib_image image not found in library."
+
+# Don't replace build file from library
+if out=$(./safer -i lib_tool); then
+	exit 1
+fi
+test "$out" = "tests/outputs/build/lib_tool already exists."
 
 # Docker override
 SAFER_RT_CMD="docker" ./safer docker_rt a_tool_image:latest
