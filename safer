@@ -69,32 +69,48 @@ shift $((OPTIND - 1))
 if [ $# -gt 0 ] && [ "${lib_tool+x}" ] || [ "${lib_image+x}" ]; then
 	item="$1"
 	shift 1
-	if [ "${lib_tool+x}" ]; then
-		echo "$lib_path" | while IFS=":" read -r location; do
-			if [ -e "$location/tools/$item" ]; then
-				sh "$location/tools/$item" "$@"
+
+	find_item_in_lib() {
+		subdir="$2"
+		item="$3"
+		oldifs=$IFS
+		IFS=:
+		set -- "$1"
+		IFS=$oldifs
+		for location; do
+			if [ -e "$location/$subdir/$item" ]; then
+				echo "$location/$subdir/$item"
 				break
 			fi
 		done
+	}
+
+	if [ "${lib_tool+x}" ]; then
+		found=$(find_item_in_lib "$lib_path" tools "$item")
+		if [ -n "$found" ]; then
+			sh "$found" "$@"
+		else
+			echo "$item tool not found in library."
+			exit 1
+		fi
 	fi
-	mkdir -p "$script_dir/build"
+
 	if [ "${lib_image+x}" ]; then
-		echo "$lib_path" | while IFS=":" read -r location; do
-			if [ -e "$location/images/$item" ]; then
-				if [ -e "$script_dir/build/$item" ]; then
-					echo "$script_dir/build/$item already exists."
-					exit 1
-				else
-					cp "$location/images/$item" "$script_dir/build/$item"
-					break
-				fi
+		found=$(find_item_in_lib "$lib_path" images "$item")
+		if [ -n "$found" ]; then
+			if [ -e "$script_dir/build/$item" ]; then
+				echo "$script_dir/build/$item already exists."
+				exit 1
+			else
+				mkdir -p "$script_dir/build"
+				cp "$found" "$script_dir/build/$item"
 			fi
-		done
-		if [ ! -e "$script_dir/build/$item" ]; then
+		else
 			echo "$item image not found in library."
 			exit 1
 		fi
 	fi
+
 	exit
 fi
 
