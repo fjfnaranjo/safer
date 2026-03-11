@@ -1,0 +1,7 @@
+FROM rust:1.93.1-alpine3.23 AS builder
+RUN apk add --no-cache g++
+RUN cargo install --root /dist emmylua_ls
+
+FROM alpine:3.23
+COPY --from=builder /dist/bin/emmylua_ls /usr/local/bin/emmylua_ls
+ENTRYPOINT ["/usr/local/bin/emmylua_ls"]

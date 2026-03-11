@@ -1,0 +1,3 @@
+FROM node:23-alpine3.21
+RUN npm -g install emmet-ls
+ENTRYPOINT ["/usr/local/bin/emmet-ls"]

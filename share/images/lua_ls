@@ -1,0 +1,12 @@
+FROM debian:trixie-slim
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl ca-certificates \
+  && mkdir /opt/lua-language-server \
+  && curl -Lo /opt/lua-language-server/lua-language-server-3.17.1-linux-x64.tar.gz https://github.com/LuaLS/lua-language-server/releases/download/3.17.1/lua-language-server-3.17.1-linux-x64.tar.gz \
+  && tar xzf /opt/lua-language-server/lua-language-server-3.17.1-linux-x64.tar.gz \
+     -C /opt/lua-language-server \
+  && install /opt/lua-language-server/bin/lua-language-server \
+     /usr/local/bin/lua-language-server \
+  && rm -rf /opt/lua-language-server/lua-language-server-3.17.1-linux-x64.tar.gz \
+  && rm -rf /var/lib/apt/lists/*
+ENTRYPOINT ["/opt/lua-language-server/bin/lua-language-server"]

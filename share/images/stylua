@@ -1,0 +1,6 @@
+FROM rust:1.93.1-alpine3.23 AS builder
+RUN cargo install --root /dist stylua
+
+FROM alpine:3.23
+COPY --from=builder /dist/bin/stylua /usr/local/bin/stylua
+ENTRYPOINT ["/usr/local/bin/stylua"]
