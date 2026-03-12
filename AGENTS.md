@@ -6,7 +6,7 @@
 
 - **Language**: POSIX-compliant shell script.
 - **Main file**: `safer`
-- **Man page**: `share/safer.1`
+- **Man page**: `share/man/safer.1`
 - **Documentation**: `README.md`
 - **Landing site**: single `web/index.html` file.
 - **TODO items**: `TODO.md`
@@ -127,7 +127,7 @@ When adding a new option, consider whether it makes sense as an environment vari
 
 1. Follow the existing section-based code organization
 2. Add environment variable support alongside CLI options
-3. Update `share/safer.1` man page for new options
+3. Update `share/man/safer.1` man page for new options
 4. Update `README.md` if the user-facing behavior described there changes
 5. Update `web/index.html` if the user-facing behavior described there changes
 6. Remove the `TODO.md` info associated with the feature if it exists.
@@ -202,8 +202,11 @@ Take into account how the generation of plain vs persistent scripts is mixed all
 ├── README.md        # User documentation
 ├── TODO.md          # TODO list
 ├── RELEASE          # Notes on the manual steps of a new release
-├── share/safer.1    # Man page
-├── web/index.html   # GitHub Pages single-page landing site
+├── share/
+│   └── man/
+│       └── safer.1  # Man page
+├── web/
+│   └── index.html   # GitHub Pages single-page landing site
 ├── .github/
 │   └── workflows/
 │       ├── release.yml    # Release automation
