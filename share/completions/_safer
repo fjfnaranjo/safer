@@ -1,5 +1,20 @@
 #compdef safer
 
+_safer_lib() {
+    local dirs dir
+    IFS=':' read -A dirs <<< "${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/share/safer}"
+    for dir in "${dirs[@]}"; do
+        [[ -d "$dir/$1" ]] && _files -W "$dir/$1"
+    done
+}
+
+_safer_lib_tools() {
+    _safer_lib "tools"
+}
+_safer_lib_images() {
+    _safer_lib "images"
+}
+
 _arguments \
   '-e[Tool entrypoint in the image]' \
   '-p[Port to expose]' \
@@ -12,7 +27,7 @@ _arguments \
   '-S[Argument injected to stop persisting containers]' \
   '-f[Force script replacement]' \
   '-s[Skip container pseudo-tty allocation]' \
-  '-l[Get the tool definition from the library]' \
-  '-i[Install a Containerfile from the library]' \
+  '-l[Get the tool definition from the library]:tool:_safer_lib_tools' \
+  '-i[Install a Containerfile from the library]:image:_safer_lib_images' \
   '-v[Display the current version]' \
   '-h[Display usage and exit]'
