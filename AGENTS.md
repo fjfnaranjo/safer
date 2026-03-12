@@ -4,12 +4,36 @@
 
 **safer** is a POSIX shell script project that creates proxy scripts to run development tools inside container runtimes (podman/docker). The scripts mounts project files at the same paths on the container, enabling tools like LSPs to report file locations correctly.
 
+It can also generate the PATH variable definition to inject the directory for the scripts.
+
+Also, it can install Containerfiles from an internal library under the `build` directory in the scripts dir and suggest the podman/docker command to build it.
+
+Finally, it can run predefined invocations of itself, present in the internal library, with the common options used for specific tools.
+
 - **Language**: POSIX-compliant shell script.
 - **Main file**: `safer`
 - **Man page**: `share/man/safer.1`
 - **Documentation**: `README.md`
 - **Landing site**: single `web/index.html` file.
 - **TODO items**: `TODO.md`
+
+## Usage
+
+- The script generator: Its base functionality. Described above.
+
+```safer [OPTIONS] <CMD> <IMAGE> [DIR...]```
+
+- Library invocation: Uses a program invocation stored in the library.
+
+```safer [-d SAFER_DIR]```
+
+- Library install: Installs a copy of a Containerfile from the library.
+
+```safer -l TOOL [DIR...]```
+
+- PATH generation: Prints a definition of PATH to add the safer dir.
+
+```safer -i TOOL```
 
 ## Build, Lint, and Test Commands
 
@@ -35,12 +59,10 @@ make check
 
 ```sh
 # Run the test suite
-make test
+make test-verbose
 ```
 
-The project implements tests using a set of "expected" files in `tests/refs`. Then, in a `Makefile`, a `test` target runs a simple suite of `safer` invocations pointing it to `tests/outputs` and running the `diff` command directly between each item ref and its output.
-
-This suite is small on purpose. Keep the tests broad, covering multiple parameters even if they don't indicate a single point of failure.
+The project implements tests using a set of "expected" files in `tests/refs`. Then, in a `Makefile`, a `test-verbose` target runs a simple suite of `safer` invocations pointing it to `tests/outputs` and, for most cases, running the `diff` command directly between each item ref and its output. In other cases, the status code or the program output is checked.
 
 ## Code Style Guidelines
 
@@ -58,24 +80,10 @@ This suite is small on purpose. Keep the tests broad, covering multiple paramete
 - Maximum line length: 72 characters (soft limit)
 - Use backslash for line continuation
 
-### Types
-
-- Shell scripts are untyped; use descriptive variable names with prefixes:
-  - `safer_*` for internal variables
-  - `SAFER_*` for environment variables
-  - `script_*` for generated script content
-
-### Naming Conventions
-
-- Variables: lowercase with underscores (`safer_cmd`, `safer_image`)
-- Environment vars: uppercase (`SAFER_DIR`, `SAFER_RT_CMD`)
-- Scripts generated: lowercase matching the command name _ and - if
-present.
-
 ### Error Handling
 
 - Rely on `set -e`
-- Use `command -v` to check for command existence (line 81)
+- Use `command -v` to check for command existence
 - Provide usage information if the arguments don't match the getopt spec
 
 ### Variable Quoting
@@ -86,12 +94,7 @@ present.
 
 ### Code Organization
 
-The main script follows this structure:
-1. **Section 1**: Initialization and argument parsing
-2. **Section 2**: Preprocessing of variables
-2. **Section 3**: Script generation/writing
-
-When extending, maintain this section-based organization.
+When extending, maintain the section-based organization comments.
 
 ### Commenting
 
@@ -155,6 +158,7 @@ Don't leave testing artifacts around, but respect existing contents in
 - The project uses GitHub Actions (see `.github/workflows/`)
 - Release workflow: automatically attaches a `tar.gz` created with the Makefile
 - Web workflow: deploys `web/` directory to GitHub Pages on master
+- CI workflow: Runs `check` and `test-verbose` targets.
 
 ## Common Patterns
 
@@ -203,13 +207,15 @@ Take into account how the generation of plain vs persistent scripts is mixed all
 ├── TODO.md          # TODO list
 ├── RELEASE          # Notes on the manual steps of a new release
 ├── share/
-│   └── man/
-│       └── safer.1  # Man page
-├── web/
-│   └── index.html   # GitHub Pages single-page landing site
+│   ├── man/safer.1  # Man page
+│   ├── completion/* # Bash and ZSH completion scripts
+│   ├── tools/*      # List of files with safer invocations (tools lib)
+│   └── images/*     # Containerfiles library (image lib)
+├── web/index.html   # GitHub Pages single-page landing site
 ├── .github/
 │   └── workflows/
 │       ├── release.yml    # Release automation
-│       └── web.yml        # Pages deployment
+│       ├── web.yml        # Pages deployment
+│       └── ci.yml         # CI testing
 └── AGENTS.md      # This file
 ```
