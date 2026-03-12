@@ -1,0 +1,18 @@
+#compdef safer
+
+_arguments \
+  '-e[Tool entrypoint in the image]' \
+  '-p[Port to expose]' \
+  '-k[Run the tool in a persistent container]' \
+  '-n[Use this name to persist the container]' \
+  '-d[Directory for the scripts]' \
+  '-R[Runtime cli command. Override podman/docker detection]' \
+  '-X[Runtime extra args]' \
+  '-K[Command used to persist the container]' \
+  '-S[Argument injected to stop persisting containers]' \
+  '-f[Force script replacement]' \
+  '-s[Skip container pseudo-tty allocation]' \
+  '-l[Get the tool definition from the library]' \
+  '-i[Install a Containerfile from the library]' \
+  '-v[Display the current version]' \
+  '-h[Display usage and exit]'
