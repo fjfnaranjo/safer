@@ -1,18 +1,30 @@
 #compdef safer
 
 _safer_lib() {
-    local dirs dir
-    IFS=':' read -A dirs <<< "${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/share/safer}"
-    for dir in "${dirs[@]}"; do
-        [[ -d "$dir/$1" ]] && _files -W "$dir/$1"
-    done
+	local dirs dir
+	IFS=':' read -A dirs <<< "${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/share/safer}"
+	for dir in "${dirs[@]}"; do
+		[[ -d "$dir/$1" ]] && _files -W "$dir/$1"
+	done
 }
 
 _safer_lib_tools() {
-    _safer_lib "tools"
+	_safer_lib "tools"
 }
 _safer_lib_images() {
-    _safer_lib "images"
+	_safer_lib "images"
+}
+
+_safer_list_images() {
+  local imgs
+  imgs=("${(@f)$(
+	if command -v podman >/dev/null 2>&1; then
+	  podman images --format '{{.Repository}}:{{.Tag}}'
+	elif command -v docker >/dev/null 2>&1; then
+	  docker images --format '{{.Repository}}:{{.Tag}}'
+	fi
+  )}")
+  compadd -a imgs
 }
 
 _arguments \
@@ -20,7 +32,7 @@ _arguments \
   '-p[Port to expose]' \
   '-k[Run the tool in a persistent container]' \
   '-n[Use this name to persist the container]' \
-  '-d[Directory for the scripts]' \
+  '-d[Directory for the scripts]:dir:_path_files -/' \
   '-R[Runtime cli command. Override podman/docker detection]' \
   '-X[Runtime extra args]' \
   '-K[Command used to persist the container]' \
@@ -30,4 +42,7 @@ _arguments \
   '-l[Get the tool definition from the library]:tool:_safer_lib_tools' \
   '-i[Install a Containerfile from the library]:image:_safer_lib_images' \
   '-v[Display the current version]' \
-  '-h[Display usage and exit]'
+  '-h[Display usage and exit]' \
+  ':cmd' \
+  ':image:_safer_list_images' \
+  '*:dir:_path_files -/'
