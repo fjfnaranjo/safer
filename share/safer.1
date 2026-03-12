@@ -3,13 +3,16 @@
 safer \- run project tools in containers using proxy scripts
 .SH SYNOPSIS
 .B safer
-[-d SAFER_DIR]
-.br
-.B safer
 [OPTIONS] <CMD> <IMAGE> [DIR...]
 .br
 .B safer
-(-l|-i|-li) TOOL [DIR...]
+[-d SAFER_DIR]
+.br
+.B safer
+-l TOOL [DIR...]
+.br
+.B safer
+-i TOOL
 .SH DESCRIPTION
 .B safer
 creates a CMD script to run a dev tool in the current directory using a
@@ -30,48 +33,53 @@ to make the scripts available immediately.
 .P
 When used with
 .B -l
-and
+,
+.B safer
+uses TOOL definitions from its internal library to run itself, with
+the extra DIR specified.
+.P
+When used with
 .B -i
 ,
 .B safer
-uses TOOL definitions from its internal library.
+installs a Containerfile for the TOOL from its internal library.
 .P
 See
 .B NOTES
 for more details.
 .SH OPTIONS
 .TP
-.BR \-e
+.BR \-e " entrypoint"
 Tool entrypoint in the image.
 .TP
-.BR \-p
-Port to expose (e.g., 8080 or 80:8080).
+.BR \-p " port[:port]"
+Port to expose.
 .TP
 .BR \-k
 Run the tool in a persistent container.
 .TP
-.BR \-n
+.BR \-n " name"
 Use this name to persist the container (implies -k).
 .TP
-.BR \-d
+.BR \-d " directory"
 Directory for the scripts.
 .br
 Default: .safer
 .TP
-.BR \-R
+.BR \-R " (podman|docker)"
 Runtime cli command. Override podman/docker detection.
 .TP
-.BR \-X
+.BR \-X " args"
 Runtime extra args.
 .br
 Docker default: --user "$(id -u):$(id -g)"
 .TP
-.BR \-K
+.BR \-K " commanmd"
 Command used to persist the container (implies -k).
 .br
 Default: sleep inf
 .TP
-.BR \-S
+.BR \-S " argument"
 Argument injected to stop persisting containers (implies -k).
 .br
 Default: --safer-stop
@@ -82,10 +90,10 @@ Force script replacement.
 .BR \-s
 Skip container pseudo-tty allocation.
 .TP
-.BR \-l
+.BR \-l " tool"
 Get the tool definition from the library.
 .TP
-.BR \-i
+.BR \-i " tool"
 Install a Containerfile from the library.
 .TP
 .BR \-v

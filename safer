@@ -13,14 +13,14 @@ Arguments:
 For the full list of Options and Environment Vars, see the man page.
 
 Options:
- -e          Tool entrypoint in the image.
- -p          Port to expose (e.g., 8080 or 80:8080).
+ -e cmd      Tool entrypoint in the image.
+ -p n[:n]    Port to expose.
  -k          Run the tool in a persistent container.
- -n          Use this name to persist the container (implies -k).
+ -n name     Use this name to persist the container (implies -k).
  -f          Force script replacement.
  -s          Skip container pseudo-tty allocation.
- -l          Get the tool definition from the library.
- -i          Install a Containerfile from the library.
+ -l tool     Get the tool definition from the library.
+ -i tool     Install a Containerfile from the library.
  -v          Display the current version.
  -h          Display usage and exit.
 
@@ -40,7 +40,7 @@ lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/shar
 persist_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 persist_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts e:p:kn:d:R:X:K:S:fslivh opt
+while getopts e:p:kn:d:R:X:K:S:fsl:i:vh opt
 do
 	case $opt in
 		e) entrypoint=$OPTARG ;;
@@ -54,8 +54,8 @@ do
 		S) persist_stop_cmd=$OPTARG; persist=1 ;;
 		f) force=1 ;;
 		s) skip_tty=1 ;;
-		l) lib_tool=1 ;;
-		i) lib_image=1 ;;
+		l) lib_tool=$OPTARG ;;
+		i) lib_image=$OPTARG ;;
 		v) echo $version && exit ;;
 		h) echo "$usage" && exit ;;
 		\?) echo "$usage" && exit 1 ;;
@@ -67,51 +67,46 @@ shift $((OPTIND - 1))
 
 # Section 2: Library commands
 
-if [ $# -gt 0 ] && { [ "${lib_tool+x}" ] || [ "${lib_image+x}" ]; }; then
-	item="$1"
-	shift 1
-
-	find_item_in_lib() {
-		oldifs=$IFS
-		IFS=:
-		for location in $lib_path; do
-			if [ -e "$location/$1/$item" ]; then
-				echo "$location/$1/$item"
-				break
-			fi
-		done
-		IFS=$oldifs
-	}
-
-	if [ "${lib_tool+x}" ]; then
-		found=$(find_item_in_lib tools)
-		if [ -n "$found" ]; then
-			sh "$found" "$@"
-		else
-			echo "$item tool not found in library."
-			exit 1
+find_item_in_lib() {
+	oldifs=$IFS
+	IFS=:
+	for location in $lib_path; do
+		if [ -e "$location/$1/$2" ]; then
+			echo "$location/$1/$2"
+			break
 		fi
-	fi
+	done
+	IFS=$oldifs
+}
 
-	if [ "${lib_image+x}" ]; then
-		found=$(find_item_in_lib images)
-		if [ -n "$found" ]; then
-			if [ -e "$script_dir/build/$item" ]; then
-				echo "$script_dir/build/$item already exists."
-				exit 1
-			else
-				mkdir -p "$script_dir/build"
-				cp "$found" "$script_dir/build/$item"
-				echo "Build script was installed. Review and build with:"
-				printf 'cat "%s"\n' "$script_dir/build/$item"
-				printf '(podman|docker) build -t "safer-%s:latest" -f "%s" "%s"\n' "$item" "$item" "$script_dir/build"
-			fi
-		else
-			echo "$item image not found in library."
+if [ "${lib_tool+x}" ]; then
+	found=$(find_item_in_lib tools "$lib_tool")
+	if [ -n "$found" ]; then
+		sh "$found" "$@"
+	else
+		echo "$lib_tool tool not found in library."
+		exit 1
+	fi
+	exit
+fi
+
+if [ "${lib_image+x}" ] && [ $# -eq 0 ]; then
+	found=$(find_item_in_lib images "$lib_image")
+	if [ -n "$found" ]; then
+		if [ -e "$script_dir/build/$lib_image" ]; then
+			echo "$script_dir/build/$lib_image already exists."
 			exit 1
+		else
+			mkdir -p "$script_dir/build"
+			cp "$found" "$script_dir/build/$lib_image"
+			echo "Build script was installed. Review and build with:"
+			printf 'cat "%s"\n' "$script_dir/build/$lib_image"
+			printf '(podman|docker) build -t "safer-%s:latest" -f "%s" "%s"\n' "$lib_image" "$lib_image" "$script_dir/build"
 		fi
+	else
+		echo "$lib_image image not found in library."
+		exit 1
 	fi
-
 	exit
 fi
 
