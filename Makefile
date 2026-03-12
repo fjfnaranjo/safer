@@ -19,6 +19,8 @@ pack:
 	@mkdir -p "dist/safer-$${SAFER_VERSION:-0.0-dev}/share/safer"
 	@cp -R share/tools "dist/safer-$${SAFER_VERSION:-0.0-dev}/share/safer"
 	@cp -R share/images "dist/safer-$${SAFER_VERSION:-0.0-dev}/share/safer"
+	@install -Dm644 share/completions/safer.bash "dist/safer-$${SAFER_VERSION:-0.0-dev}/share/bash-completion/completions/safer.bash"
+	@install -Dm644 share/completions/_safer "dist/safer-$${SAFER_VERSION:-0.0-dev}/share/zsh/site-functions/_safer"
 	@tar czf "dist/safer-$${SAFER_VERSION:-0.0-dev}.tar.gz" -C dist "safer-$${SAFER_VERSION:-0.0-dev}"
 
 .PHONY: update-install-docs
