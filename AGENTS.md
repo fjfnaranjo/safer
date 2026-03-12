@@ -6,7 +6,7 @@
 
 - **Language**: POSIX-compliant shell script.
 - **Main file**: `safer`
-- **Man page**: `safer.1`
+- **Man page**: `share/safer.1`
 - **Documentation**: `README.md`
 - **Landing site**: single `web/index.html` file.
 - **TODO items**: `TODO.md`
@@ -127,7 +127,7 @@ When adding a new option, consider whether it makes sense as an environment vari
 
 1. Follow the existing section-based code organization
 2. Add environment variable support alongside CLI options
-3. Update `safer.1` man page for new options
+3. Update `share/safer.1` man page for new options
 4. Update `README.md` if the user-facing behavior described there changes
 5. Update `web/index.html` if the user-facing behavior described there changes
 6. Remove the `TODO.md` info associated with the feature if it exists.
@@ -153,7 +153,7 @@ Don't leave testing artifacts around, but respect existing contents in
 ### CI/CD
 
 - The project uses GitHub Actions (see `.github/workflows/`)
-- Release workflow: automatically attaches `safer` and `safer.1` to releases
+- Release workflow: automatically attaches a `tar.gz` created with the Makefile
 - Web workflow: deploys `web/` directory to GitHub Pages on master
 
 ## Common Patterns
@@ -199,10 +199,10 @@ Take into account how the generation of plain vs persistent scripts is mixed all
 ```
 .
 ├── safer            # Main script (executable)
-├── safer.1          # Man page
 ├── README.md        # User documentation
 ├── TODO.md          # TODO list
 ├── RELEASE          # Notes on the manual steps of a new release
+├── share/safer.1    # Man page
 ├── web/index.html   # GitHub Pages single-page landing site
 ├── .github/
 │   └── workflows/
