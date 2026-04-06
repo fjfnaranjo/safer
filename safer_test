@@ -48,10 +48,19 @@ test -e "tests/outputs/alt/dest"
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Don't replace existing scripts..."
-if out=$(./safer basic same_tool_image:latest); then
+touch tests/outputs/existing_basic
+if out=$(./safer existing_basic a_tool_image:latest); then
 	exit 1
 fi
-test "$out" = "tests/outputs/basic already exists."
+test "$out" = "tests/outputs/existing_basic already exists."
+
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Do replace existing scripts with -f..."
+touch tests/outputs/also_existing_basic
+./safer -f also_existing_basic a_tool_image:latest
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/also_existing_basic
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/also_existing_basic
+diff tests/refs/basic tests/outputs/also_existing_basic
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Generation with port..."
