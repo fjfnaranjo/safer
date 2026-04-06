@@ -93,7 +93,7 @@ fi
 if [ "${lib_image+x}" ] && [ $# -eq 0 ]; then
 	found=$(find_item_in_lib images "$lib_image")
 	if [ -n "$found" ]; then
-		if [ -e "$script_dir/build/$lib_image" ]; then
+		if [ -e "$script_dir/build/$lib_image" ] && [ -z "$force" ]; then
 			echo "$script_dir/build/$lib_image already exists."
 			exit 1
 		else

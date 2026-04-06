@@ -194,10 +194,18 @@ test "$out" = "not_a_lib_image image not found in library."
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Don't replace build file from library..."
-if out=$(./safer -i lib_tool); then
+touch tests/outputs/build/lib_tool_existing
+if out=$(./safer -i lib_tool_existing); then
 	exit 1
 fi
-test "$out" = "tests/outputs/build/lib_tool already exists."
+test "$out" = "tests/outputs/build/lib_tool_existing already exists."
+
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Do replace build file from library with -f..."
+touch tests/outputs/build/lib_tool_also_existing
+./safer -f -i lib_tool_also_existing > /dev/null
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/build/lib_tool_also_existing
+diff tests/lib/images/lib_tool_also_existing tests/outputs/build/lib_tool_also_existing
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Docker override..."
