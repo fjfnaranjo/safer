@@ -65,5 +65,6 @@ Use Homebrew:
 
 ```
 brew tap fjfnaranjo/safer
+brew trust fjfnaranjo/safer
 brew install safer
 ```
