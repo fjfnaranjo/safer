@@ -21,7 +21,7 @@ Options:
  -s          Skip container pseudo-tty allocation.
  -l tool     Get the tool definition from the library.
  -i tool     Install a Containerfile from the library.
- -L tool     Combine both -l and -i.
+ -L tool     Combine (and override) both -l and -i.
  -v          Display the current version.
  -h          Display usage and exit.
 
