@@ -60,6 +60,11 @@ Run the tool in a persistent container.
 .TP
 .BR \-n " name"
 Use this name to persist the container (implies -k).
+.br
+Takes precedence over -N.
+.TP
+.BR \-N " name"
+Similar to -n, but the CWD will be added, like plain -k does.
 .TP
 .BR \-d " directory"
 Directory for the scripts.

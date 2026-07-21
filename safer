@@ -41,13 +41,14 @@ lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/shar
 persist_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 persist_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts e:p:kn:d:R:X:K:S:fsl:i:L:vh opt
+while getopts e:p:kn:N:d:R:X:K:S:fsl:i:L:vh opt
 do
 	case $opt in
 		e) entrypoint=$OPTARG ;;
 		p) port=$OPTARG ;;
 		k) persist=1 ;;
 		n) container_name=$OPTARG; persist=1 ;;
+		N) container_base_name=$OPTARG; persist=1 ;;
 		d) script_dir=$OPTARG ;;
 		R) runtime_cmd=$OPTARG ;;
 		X) runtime_args=$OPTARG ;;
@@ -143,9 +144,15 @@ if [ -n "$port" ]; then
 	esac
 fi
 
-if [ "${persist+x}" ] && [ -z "$container_name" ]; then
-	clean_cmd="$(echo "${PWD##*/}" | tr -cd '[:alnum:]')"
-	container_name="$tool-$clean_cmd"
+if [ "${persist+x}" ]; then
+	if [ -z "$container_name" ]; then
+		clean_cwd="$(echo "${PWD##*/}" | tr -cd '[:alnum:]')"
+		if [ -n "$container_base_name" ]; then
+			container_name="$container_base_name-$clean_cwd"
+		else
+			container_name="$tool-$clean_cwd"
+		fi
+	fi
 fi
 
 if [ -z "${runtime_cmd:=$SAFER_RT_CMD}" ]; then

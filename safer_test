@@ -108,10 +108,17 @@ if [ -n "$test_runtime" ]; then
 
 	# ---- TEST CASE ----
 	[ "$1" = "verbose" ] && echo "Persistent and named..."
-	./safer -k -n safer-test-container-named persistent-named safer-test-image-no-entrypoint
+	./safer -n safer-test-container-named persistent-named safer-test-image-no-entrypoint
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-named
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-named
 	diff tests/refs/persistent-named tests/outputs/persistent-named
+
+	# ---- TEST CASE ----
+	[ "$1" = "verbose" ] && echo "Persistent and prefixed..."
+	./safer -N safer-test-container-prefixed persistent-prefixed safer-test-image-no-entrypoint
+	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-prefixed
+	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-prefixed
+	diff tests/refs/persistent-prefixed tests/outputs/persistent-prefixed
 
 	# ---- TEST CASE ----
 	[ "$1" = "verbose" ] && echo "Persistent and simple entrypoint..."
