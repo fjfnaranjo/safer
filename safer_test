@@ -208,6 +208,32 @@ touch tests/outputs/build/lib_tool_also_existing
 diff tests/lib/images/lib_tool_also_existing tests/outputs/build/lib_tool_also_existing
 
 # ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Combined library tool and image..."
+expected=$(mktemp)
+actual=$(mktemp)
+cat > "$expected" <<EOF
+Build script was installed. Review and build with:
+cat "tests/outputs/build/lib_tool_combined"
+(podman|docker) build -t "safer-lib_tool_combined:latest" -f "lib_tool_combined" "tests/outputs/build"
+EOF
+./safer -L lib_tool_combined > "$actual"
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_combined
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool_combined
+diff tests/refs/lib_tool_combined tests/outputs/lib_tool_combined
+diff tests/lib/images/lib_tool_combined tests/outputs/build/lib_tool_combined
+diff "$expected" "$actual"
+rm "$expected"
+rm "$actual"
+
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Combined library tool, image, and extra volumes /vol/1 /vol/2..."
+./safer -L lib_tool_combined_volumes /vol/1 /vol/2 > /dev/null
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_combined_volumes
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool_combined_volumes
+diff tests/refs/lib_tool_combined_volumes tests/outputs/lib_tool_combined_volumes
+diff tests/lib/images/lib_tool_combined_volumes tests/outputs/build/lib_tool_combined_volumes
+
+# ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Docker override..."
 SAFER_RT_CMD="docker" ./safer docker_rt a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/docker_rt

@@ -21,6 +21,7 @@ Options:
  -s          Skip container pseudo-tty allocation.
  -l tool     Get the tool definition from the library.
  -i tool     Install a Containerfile from the library.
+ -L tool     Combine both -l and -i.
  -v          Display the current version.
  -h          Display usage and exit.
 
@@ -40,7 +41,7 @@ lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/shar
 persist_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 persist_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts e:p:kn:d:R:X:K:S:fsl:i:vh opt
+while getopts e:p:kn:d:R:X:K:S:fsl:i:L:vh opt
 do
 	case $opt in
 		e) entrypoint=$OPTARG ;;
@@ -56,6 +57,7 @@ do
 		s) skip_tty=1 ;;
 		l) lib_tool=$OPTARG ;;
 		i) lib_image=$OPTARG ;;
+		L) lib_tool=$OPTARG; lib_image=$OPTARG ;;
 		v) echo $version && exit ;;
 		h) echo "$usage" && exit ;;
 		\?) echo "$usage" && exit 1 ;;
@@ -87,10 +89,12 @@ if [ "${lib_tool+x}" ]; then
 		echo "$lib_tool tool not found in library."
 		exit 1
 	fi
-	exit
+	if [ ! "${lib_image+x}" ]; then
+		exit
+	fi
 fi
 
-if [ "${lib_image+x}" ] && [ $# -eq 0 ]; then
+if [ "${lib_image+x}" ] && { [ "${lib_tool+x}" ] || [ $# -eq 0 ]; }; then
 	found=$(find_item_in_lib images "$lib_image")
 	if [ -n "$found" ]; then
 		if [ -e "$script_dir/build/$lib_image" ] && [ -z "$force" ]; then
@@ -156,7 +160,7 @@ if [ -z "${runtime_cmd:=$SAFER_RT_CMD}" ]; then
 fi
 
 if [ ! "${runtime_args+x}" ]; then
-	if [ "${SAFER_RT_ARGS+x}"  ]; then
+	if [ "${SAFER_RT_ARGS+x}" ]; then
 		runtime_args=$SAFER_RT_ARGS
 	else
 		if [ "$runtime_cmd" = "docker" ] || [ "$runtime_cmd" = "sudo docker" ]; then
