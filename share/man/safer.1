@@ -13,6 +13,9 @@ safer \- run project tools in containers using proxy scripts
 .br
 .B safer
 -i TOOL
+.br
+.B safer
+-L TOOL [DIR...]
 .SH DESCRIPTION
 .B safer
 creates a CMD script to run a dev tool in the current directory using a
@@ -43,6 +46,14 @@ When used with
 ,
 .B safer
 installs a Containerfile for the TOOL from its internal library.
+.P
+When used with
+.B -L
+, the effects of
+.B -i
+and
+.B -l
+are combined.
 .P
 See
 .B NOTES

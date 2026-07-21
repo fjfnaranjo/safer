@@ -1,1 +1,1 @@
-./safer lib_tool_alt lib_tool_image:latest "$@"
+lib_tool_alt lib_tool_image:latest

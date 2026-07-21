@@ -1,1 +1,1 @@
-safer -s -k opencode ghcr.io/anomalyco/opencode
+-s -k opencode ghcr.io/anomalyco/opencode

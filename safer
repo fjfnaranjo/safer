@@ -85,17 +85,18 @@ find_item_in_lib() {
 if [ "${lib_tool+x}" ]; then
 	found=$(find_item_in_lib tools "$lib_tool")
 	if [ -n "$found" ]; then
-		sh "$found" "$@"
+		eval 'set -- $(cat "$found") "$@"'
+		"$0" "$@"
+		set --
+		[ ! "${lib_image+x}" ] && exit
 	else
 		echo "$lib_tool tool not found in library."
 		exit 1
 	fi
-	if [ ! "${lib_image+x}" ]; then
-		exit
-	fi
 fi
 
-if [ "${lib_image+x}" ] && { [ "${lib_tool+x}" ] || [ $# -eq 0 ]; }; then
+if [ "${lib_image+x}" ]; then
+	[ $# -ne 0 ] && echo "$usage" && exit 1
 	found=$(find_item_in_lib images "$lib_image")
 	if [ -n "$found" ]; then
 		if [ -e "$script_dir/build/$lib_image" ] && [ -z "$force" ]; then
@@ -107,12 +108,12 @@ if [ "${lib_image+x}" ] && { [ "${lib_tool+x}" ] || [ $# -eq 0 ]; }; then
 			echo "Build script was installed. Review and build with:"
 			printf 'cat "%s"\n' "$script_dir/build/$lib_image"
 			printf '(podman|docker) build -t "safer-%s:latest" -f "%s" "%s"\n' "$lib_image" "$lib_image" "$script_dir/build"
+			exit
 		fi
 	else
 		echo "$lib_image image not found in library."
 		exit 1
 	fi
-	exit
 fi
 
 # Section 3: Non-library execution, PATH definition and bad args exit

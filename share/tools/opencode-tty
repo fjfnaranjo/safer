@@ -1,1 +1,1 @@
-safer -p 4096 -N opencode opencode-tty ghcr.io/anomalyco/opencode
+-p 4096 -N opencode opencode-tty ghcr.io/anomalyco/opencode
