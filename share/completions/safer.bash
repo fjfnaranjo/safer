@@ -1,17 +1,16 @@
 _safer_complete() {
-	local cur prev lib_path subdir items dir opts skip_next positionals images
+	local cur prev lib_path items dir opts skip_next positionals images
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-	# -l, -i
+	# -i
 	lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/share/safer}
-	if [[ "$prev" == "-l" || "$prev" == "-i" ]]; then
-		[[ "$prev" == "-l" ]] && subdir=tools || subdir=images
+	if [[ "$prev" == "-i" ]]; then
 		items=()
 		IFS=':' read -ra dirs <<< "$lib_path"
 		for dir in "${dirs[@]}"; do
-			if [[ -d "$dir/$subdir" ]]; then
-				for f in "$dir/$subdir"/*; do
+			if [[ -d "$dir/images" ]]; then
+				for f in "$dir/images"/*; do
 					[[ -f "$f" ]] && items+=("$(basename "$f")")
 				done
 			fi
@@ -22,7 +21,7 @@ _safer_complete() {
 
 	# -* options
 	if [[ "$cur" == -* ]]; then
-		opts="-e -p -k -n -d -R -X -K -S -f -s -l -i -v -h"
+		opts="-e -p -k -n -d -R -X -K -S -f -s -i -v -h"
 		COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
 		return
 	fi
@@ -37,7 +36,7 @@ _safer_complete() {
 			continue
 		fi
 		case "$w" in
-			-e|-p|-n|-d|-R|-X|-K|-S|-l|-i)
+			-e|-p|-n|-d|-R|-X|-K|-S|-i)
 				skip_next=1
 				;;
 			-*)

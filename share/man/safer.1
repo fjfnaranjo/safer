@@ -9,13 +9,7 @@ safer \- run project tools in containers using proxy scripts
 [-d SAFER_DIR]
 .br
 .B safer
--l TOOL [DIR...]
-.br
-.B safer
 -i TOOL
-.br
-.B safer
--L TOOL [DIR...]
 .SH DESCRIPTION
 .B safer
 creates a CMD script to run a dev tool in the current directory using a
@@ -35,25 +29,10 @@ environment variable. You can also run
 to make the scripts available immediately.
 .P
 When used with
-.B -l
-,
-.B safer
-uses TOOL definitions from its internal library to run itself, with
-the extra DIR specified.
-.P
-When used with
 .B -i
 ,
 .B safer
 installs a Containerfile for the TOOL from its internal library.
-.P
-When used with
-.B -L
-, the effects of
-.B -i
-and
-.B -l
-are combined.
 .P
 See
 .B NOTES
@@ -106,14 +85,8 @@ Force script replacement.
 .BR \-s
 Skip container pseudo-tty allocation.
 .TP
-.BR \-l " tool"
-Get the tool definition from the library.
-.TP
 .BR \-i " tool"
 Install a Containerfile from the library.
-.TP
-.BR \-L " tool"
-Combine (and override) both -l and -i.
 .TP
 .BR \-v
 Display the current version.
@@ -155,10 +128,8 @@ These files are sourced by safer.
 .TP
 .BR ~/.local/share/safer ", "/usr/share/safer ", "/usr/local/share/safer
 These are the default locations for the
-.B tools
-and
 .B images
-directories used by the library options.
+directory used by the -i option.
 .SH NOTES
 .P
 PERSISTENT CONTAINERS

@@ -6,9 +6,7 @@
 
 It can also generate the PATH variable definition to inject the directory for the scripts.
 
-Also, it can install Containerfiles from an internal library under the `build` directory in the scripts dir and suggest the podman/docker command to build it.
-
-Finally, it can run predefined invocations of itself, present in the internal library, with the common options used for specific tools.
+Finally, it can install Containerfiles from an internal library under the `build` directory in the scripts dir and build them.
 
 - **Language**: POSIX-compliant shell script.
 - **Main file**: `safer`
@@ -23,15 +21,11 @@ Finally, it can run predefined invocations of itself, present in the internal li
 
 ```safer [OPTIONS] <CMD> <IMAGE> [DIR...]```
 
-- Library invocation: Uses a program invocation stored in the library.
+- PATH generation: Prints a definition of PATH to add the safer dir.
 
 ```safer [-d SAFER_DIR]```
 
 - Library install: Installs a copy of a Containerfile from the library.
-
-```safer -l TOOL [DIR...]```
-
-- PATH generation: Prints a definition of PATH to add the safer dir.
 
 ```safer -i TOOL```
 
@@ -209,7 +203,6 @@ Take into account how the generation of plain vs persistent scripts is mixed all
 ├── share/
 │   ├── man/safer.1  # Man page
 │   ├── completion/* # Bash and ZSH completion scripts
-│   ├── tools/*      # List of files with safer invocations (tools lib)
 │   └── images/*     # Containerfiles library (image lib)
 ├── web/index.html   # GitHub Pages single-page landing site
 ├── .github/

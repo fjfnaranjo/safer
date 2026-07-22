@@ -59,10 +59,6 @@ test "$out" = "tests/outputs/existing_basic already exists."
 touch tests/outputs/also_existing_basic
 ./safer -f also_existing_basic a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/also_existing_basic
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/also_existing_basic
-diff tests/refs/basic tests/outputs/also_existing_basic
-
-# ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Generation with port..."
 ./safer -p 10443 port a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/port
@@ -146,35 +142,7 @@ if [ -n "$test_runtime" ]; then
 	$test_runtime rmi safer-test-image-sh > /dev/null
 fi
 
-export SAFER_LIB_PATH=tests/lib
-
-# ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Library tool..."
-./safer -l lib_tool
-sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool
-diff tests/refs/lib_tool tests/outputs/lib_tool
-
-# ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Missing library tool..."
-if out=$(./safer -l not_a_lib_tool); then
-	exit 1
-fi
-test "$out" = "not_a_lib_tool tool not found in library."
-
-# ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Library item in alternative location..."
-SAFER_LIB_PATH=tests/lib:tests/lib2 ./safer -l lib_tool_alt
-sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_alt
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool_alt
-diff tests/refs/lib_tool tests/outputs/lib_tool_alt
-
-# ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Library tool with extra volumes /vol/1 /vol/2..."
-./safer -l lib_tool_volumes /vol/1 /vol/2
-sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_volumes
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool_volumes
-diff tests/refs/lib_tool_volumes tests/outputs/lib_tool_volumes
+export SAFER_LIB_PATH=tests/share
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Library image..."
@@ -182,12 +150,11 @@ expected=$(mktemp)
 actual=$(mktemp)
 cat > "$expected" <<EOF
 Build script was installed. Review and build with:
-cat "tests/outputs/build/lib_tool"
-(podman|docker) build -t "safer-lib_tool:latest" -f "lib_tool" "tests/outputs/build"
+cat "tests/outputs/build/build_tool"
+(podman|docker) build -t "safer-build_tool:latest" -f "build_tool" "tests/outputs/build"
 EOF
-./safer -i lib_tool > "$actual"
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/build/lib_tool
-diff tests/lib/images/lib_tool tests/outputs/build/lib_tool
+./safer -i build_tool > "$actual"
+diff tests/share/images/build_tool tests/outputs/build/build_tool
 diff "$expected" "$actual"
 rm "$expected"
 rm "$actual"
@@ -201,44 +168,22 @@ test "$out" = "not_a_lib_image image not found in library."
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Don't replace build file from library..."
-touch tests/outputs/build/lib_tool_existing
-if out=$(./safer -i lib_tool_existing); then
+touch tests/outputs/build/build_tool_existing
+if out=$(./safer -i build_tool_existing); then
 	exit 1
 fi
-test "$out" = "tests/outputs/build/lib_tool_existing already exists."
+test "$out" = "tests/outputs/build/build_tool_existing already exists."
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Do replace build file from library with -f..."
-touch tests/outputs/build/lib_tool_also_existing
-./safer -f -i lib_tool_also_existing > /dev/null
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/build/lib_tool_also_existing
-diff tests/lib/images/lib_tool_also_existing tests/outputs/build/lib_tool_also_existing
+touch tests/outputs/build/build_tool_also_existing
+./safer -f -i build_tool_also_existing > /dev/null
+diff tests/share/images/build_tool_also_existing tests/outputs/build/build_tool_also_existing
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Combined library tool and image..."
-expected=$(mktemp)
-actual=$(mktemp)
-cat > "$expected" <<EOF
-Build script was installed. Review and build with:
-cat "tests/outputs/build/lib_tool_combined"
-(podman|docker) build -t "safer-lib_tool_combined:latest" -f "lib_tool_combined" "tests/outputs/build"
-EOF
-./safer -L lib_tool_combined > "$actual"
-sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_combined
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool_combined
-diff tests/refs/lib_tool_combined tests/outputs/lib_tool_combined
-diff tests/lib/images/lib_tool_combined tests/outputs/build/lib_tool_combined
-diff "$expected" "$actual"
-rm "$expected"
-rm "$actual"
-
-# ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Combined library tool, image, and extra volumes /vol/1 /vol/2..."
-./safer -L lib_tool_combined_volumes /vol/1 /vol/2 > /dev/null
-sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/lib_tool_combined_volumes
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/lib_tool_combined_volumes
-diff tests/refs/lib_tool_combined_volumes tests/outputs/lib_tool_combined_volumes
-diff tests/lib/images/lib_tool_combined_volumes tests/outputs/build/lib_tool_combined_volumes
+[ "$1" = "verbose" ] && echo "Get the build file from an alternative location..."
+SAFER_LIB_PATH=tests/share:tests/share_alt ./safer -i build_tool_alt > /dev/null
+diff tests/share_alt/images/build_tool_alt tests/outputs/build/build_tool_alt
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Docker override..."

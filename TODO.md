@@ -1,6 +1,5 @@
 # safer TODO
 
-- Remove tools (not images) completely.
 - Allow the definition of environment variables.
 - Allow to specify what environment variables should be passed from the
   shim environment to the tool in the container.

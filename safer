@@ -19,9 +19,7 @@ Options:
  -n name     Use this name to persist the container (implies -k).
  -f          Force script replacement.
  -s          Skip container pseudo-tty allocation.
- -l tool     Get the tool definition from the library.
  -i tool     Install a Containerfile from the library.
- -L tool     Combine (and override) both -l and -i.
  -v          Display the current version.
  -h          Display usage and exit.
 
@@ -41,7 +39,7 @@ lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/shar
 persist_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 persist_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts e:p:kn:N:d:R:X:K:S:fsl:i:L:vh opt
+while getopts e:p:kn:N:d:R:X:K:S:fsi:vh opt
 do
 	case $opt in
 		e) entrypoint=$OPTARG ;;
@@ -56,9 +54,7 @@ do
 		S) persist_stop_cmd=$OPTARG; persist=1 ;;
 		f) force=1 ;;
 		s) skip_tty=1 ;;
-		l) lib_tool=$OPTARG ;;
 		i) lib_image=$OPTARG ;;
-		L) lib_tool=$OPTARG; lib_image=$OPTARG ;;
 		v) echo $version && exit ;;
 		h) echo "$usage" && exit ;;
 		\?) echo "$usage" && exit 1 ;;
@@ -81,19 +77,6 @@ find_item_in_lib() {
 	done
 	IFS=$oldifs
 }
-
-if [ "${lib_tool+x}" ]; then
-	found=$(find_item_in_lib tools "$lib_tool")
-	if [ -n "$found" ]; then
-		eval 'set -- $(cat "$found") "$@"'
-		"$0" "$@"
-		set --
-		[ ! "${lib_image+x}" ] && exit
-	else
-		echo "$lib_tool tool not found in library."
-		exit 1
-	fi
-fi
 
 if [ "${lib_image+x}" ]; then
 	[ $# -ne 0 ] && echo "$usage" && exit 1

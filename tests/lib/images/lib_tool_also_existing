@@ -1,3 +1,0 @@
-FROM some_image:some_tag
-RUN install-tool
-ENTRYPOINT ["/usr/bin/tool"]
