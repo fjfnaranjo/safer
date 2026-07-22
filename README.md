@@ -36,9 +36,9 @@ Download and unpack the last safer release:
 
 ```
 cd /tmp
-curl -LO https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc8/safer-0.1-rc8.tar.gz
-tar -xzf safer-0.1-rc8.tar.gz
-cd safer-0.1-rc8
+curl -LO https://github.com/fjfnaranjo/safer/releases/download/release-0.1-rc9/safer-0.1-rc9.tar.gz
+tar -xzf safer-0.1-rc9.tar.gz
+cd safer-0.1-rc9
 ```
 
 Install the files for your user (if you have `~/.local/bin` in your **PATH**):
