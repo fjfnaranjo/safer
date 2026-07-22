@@ -160,6 +160,20 @@ rm "$expected"
 rm "$actual"
 
 # ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Library image and build..."
+expected=$(mktemp)
+actual=$(mktemp)
+cat > "$expected" <<EOF
+$ echo build -t "safer-build_tool_build:latest" -f "build_tool_build" "tests/outputs/build"
+build -t safer-build_tool_build:latest -f build_tool_build tests/outputs/build
+EOF
+SAFER_RT_CMD="echo" ./safer -I build_tool_build > "$actual"
+diff tests/share/images/build_tool_build tests/outputs/build/build_tool_build
+diff "$expected" "$actual"
+rm "$expected"
+rm "$actual"
+
+# ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Missing library image..."
 if out=$(./safer -i not_a_lib_image); then
 	exit 1

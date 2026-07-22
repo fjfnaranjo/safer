@@ -7,7 +7,6 @@
   - Rolling release strategy.
   - Templates for language specific distribution tools and other
     universal installers (like mise-en-place).
-- Add an option to build the images from the library.
 - Write a better explanation for the -t -i podman/docker flag controls.
   - None: Don't apply, generally, to dev tools.
   - Just -t: Doesn't make much sense also.

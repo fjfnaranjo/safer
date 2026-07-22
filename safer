@@ -20,6 +20,7 @@ Options:
  -f          Force script replacement.
  -s          Skip container pseudo-tty allocation.
  -i tool     Install a Containerfile from the library.
+ -I tool     Install and build a Containerfile from the library.
  -v          Display the current version.
  -h          Display usage and exit.
 
@@ -39,7 +40,7 @@ lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/shar
 persist_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 persist_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts e:p:kn:N:d:R:X:K:S:fsi:vh opt
+while getopts e:p:kn:N:d:R:X:K:S:fsi:I:vh opt
 do
 	case $opt in
 		e) entrypoint=$OPTARG ;;
@@ -55,6 +56,7 @@ do
 		f) force=1 ;;
 		s) skip_tty=1 ;;
 		i) lib_image=$OPTARG ;;
+		I) lib_image=$OPTARG; build=1 ;;
 		v) echo $version && exit ;;
 		h) echo "$usage" && exit ;;
 		\?) echo "$usage" && exit 1 ;;
@@ -65,6 +67,17 @@ done
 shift $((OPTIND - 1))
 
 # Section 2: Library commands
+
+if [ -z "${runtime_cmd:=$SAFER_RT_CMD}" ]; then
+	if command -v podman >/dev/null 2>&1; then
+		runtime_cmd=podman
+	elif command -v docker >/dev/null 2>&1; then
+		runtime_cmd=docker
+	else
+		echo "Cannot detect a container runtime. See man page for more info."
+		exit 1
+	fi
+fi
 
 find_item_in_lib() {
 	oldifs=$IFS
@@ -88,9 +101,14 @@ if [ "${lib_image+x}" ]; then
 		else
 			mkdir -p "$script_dir/build"
 			cp "$found" "$script_dir/build/$lib_image"
-			echo "Build script was installed. Review and build with:"
-			printf 'cat "%s"\n' "$script_dir/build/$lib_image"
-			printf '(podman|docker) build -t "safer-%s:latest" -f "%s" "%s"\n' "$lib_image" "$lib_image" "$script_dir/build"
+			if [ "${build+x}" ]; then
+				printf '$ %s build -t "safer-%s:latest" -f "%s" "%s"\n' "$runtime_cmd" "$lib_image" "$lib_image" "$script_dir/build"
+				"$runtime_cmd" build -t "safer-$lib_image:latest" -f "$lib_image" "$script_dir/build"
+			else
+				echo "Build script was installed. Review and build with:"
+				printf 'cat "%s"\n' "$script_dir/build/$lib_image"
+				printf '(podman|docker) build -t "safer-%s:latest" -f "%s" "%s"\n' "$lib_image" "$lib_image" "$script_dir/build"
+			fi
 			exit
 		fi
 	else
@@ -136,17 +154,6 @@ if [ "${persist+x}" ]; then
 		else
 			container_name="$tool-$clean_cwd"
 		fi
-	fi
-fi
-
-if [ -z "${runtime_cmd:=$SAFER_RT_CMD}" ]; then
-	if command -v podman >/dev/null 2>&1; then
-		runtime_cmd=podman
-	elif command -v docker >/dev/null 2>&1; then
-		runtime_cmd=docker
-	else
-		echo "Cannot detect a container runtime. See man page for more info."
-		exit 1
 	fi
 fi
 
