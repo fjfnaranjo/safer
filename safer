@@ -221,7 +221,7 @@ interactive_flag=-ti
 	printf 'project_dir="%s"\n' "$cwd"
 	printf 'case "$(pwd -P)/" in\n'
 	printf '\t"$project_dir/"*) ;;\n'
-	printf '\t*) echo "safer: $0: outside project dir" 2>&1; exit 1 ;;\n'
+	printf '\t*) echo "safer: $0: outside project dir" >&2; exit 1 ;;\n'
 	printf 'esac\n'
 
 	if [ -n "$container_name" ]; then

@@ -2,7 +2,7 @@
 project_dir="CWD"
 case "$(pwd -P)/" in
 	"$project_dir/"*) ;;
-	*) echo "safer: $0: outside project dir" 2>&1; exit 1 ;;
+	*) echo "safer: $0: outside project dir" >&2; exit 1 ;;
 esac
 if [ "$*" = "--safer-stop" ]; then
 	podman kill safer-test-container-prefixed-safer
