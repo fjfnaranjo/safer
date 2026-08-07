@@ -123,11 +123,13 @@ When adding a new option, consider whether it makes sense as an environment vari
 ### Adding New Features
 
 1. Follow the existing section-based code organization
-2. Add environment variable support alongside CLI options
-3. Update `share/man/safer.1` man page for new options
-4. Update `README.md` if the user-facing behavior described there changes
-5. Update `web/index.html` if the user-facing behavior described there changes
-6. Remove the `TODO.md` info associated with the feature if it exists.
+2. Consider adding tests.
+3. Consider add environment variable support alongside CLI options
+4. Update `share/man/safer.1` man page for new options
+5. Update `README.md` if the user-facing behavior described there changes
+6. Update `web/index.html` if the user-facing behavior described there changes
+7. Update the shell completion scripts if applies.
+8. Remove the `TODO.md` info associated with the feature if it exists.
 
 ### Running Locally
 
