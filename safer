@@ -18,7 +18,7 @@ Options:
  -k          Run the tool in a persistent container.
  -n name     Use this name to persist the container (implies -k).
  -f          Force script replacement.
- -t MODE     Override the stdin/pseudo-tty behaviors.
+ -t MODE     Override stdin/pseudo-tty defaults.
  -i tool     Install a Containerfile from the library.
  -I tool     Install and build a Containerfile from the library.
  -v          Display the current version.

@@ -33,7 +33,7 @@ _arguments \
   '-K[Command used to persist the container]' \
   '-a[Argument injected to stop persisting containers]' \
   '-f[Force script replacement]' \
-  '-t[Override the stdin/pseudo-tty behaviors]:mode:(AUTO BOTH STDIN TTY NONE)' \
+  '-t[Override stdin/pseudo-tty defaults]:mode:(AUTO BOTH STDIN TTY NONE)' \
   '-i[Install a Containerfile from the library]:image:_safer_lib_images' \
   '-I[Install and build a Containerfile from the library]:image:_safer_lib_images' \
   '-v[Display the current version]' \
