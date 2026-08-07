@@ -48,6 +48,16 @@ Port to expose.
 .BR \-k
 Run the tool in a persistent container.
 .TP
+.BR \-K " commanmd"
+Command used to persist the container (implies -k).
+.br
+Default: sleep inf
+.TP
+.BR \-S " argument"
+Argument injected to stop persisting containers (implies -k).
+.br
+Default: --safer-stop
+.TP
 .BR \-n " name"
 Use this name to persist the container (implies -k).
 .br
@@ -55,6 +65,8 @@ Takes precedence over -N.
 .TP
 .BR \-N " name"
 Similar to -n, but the CWD will be added, like plain -k does.
+.br
+Will not be used if -n is specified.
 .TP
 .BR \-d " directory"
 Directory for the scripts.
@@ -68,16 +80,6 @@ Runtime cli command. Override podman/docker detection.
 Runtime extra args.
 .br
 Docker default: --user "$(id -u):$(id -g)"
-.TP
-.BR \-K " commanmd"
-Command used to persist the container (implies -k).
-.br
-Default: sleep inf
-.TP
-.BR \-S " argument"
-Argument injected to stop persisting containers (implies -k).
-.br
-Default: --safer-stop
 .TP
 .BR \-f
 Force script replacement.
@@ -144,14 +146,19 @@ run
 .BR safer
 with
 .BR -k .
-If so, a named persistent container will be created by the script and
-the commands will execute using
+In this mode, a named persistent container will be created by the script
+and the commands will execute using
 .BR exec,
 preserving the state of the container across executions. This container
 can be stopped using the CMD with the injected argument
 .BR --safer-stop.
-You can specify a name for the container with
-.BR -n .
+.P
+The container name will be the CMD with the CWD as a suffix. You can
+specify a custom name with
+.BR -n
+or
+.BR -N
+if you also want the CWD prefixed to it.
 .P
 RUNTIME DETECTION
 .P
@@ -184,6 +191,6 @@ another process using STDIN.
 PHYSICAL/ABSOLUTE PATHS
 .P
 .B safer
-enforces absolute paths in scripts generation. This is coherent with
-how container runtimes work but may break host tools if they need path
+enforces absolute paths in scripts generation. This is coherent with how
+container runtimes work but may break host tools if they need path
 information from inside the container.
