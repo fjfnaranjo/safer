@@ -179,13 +179,27 @@ runtime arguments.
 .P
 PSEUDO-TTY ALLOCATION
 .P
-To ensure interactive tools can be used,
+To ensure interactive CMDs can be used by default,
 .BR safer
-will instruct container runtimes to allocate a pseudo-tty by default.
-Set the flag
-.BR -s
-to skip this when using LSPs and similar tools that are controlled by
-another process using STDIN.
+will instruct the container runtimes to pass the STDIN and will try to
+guess when to allocate a pseudo-tty. Some tools,
+like LSPs or scripts streaming the standard FDs, need different
+combinations of this two features. Use
+.BR -t " MODE"
+to override what
+.BR safer
+requests by default.
+.P
+.BR AUTO
+is the default (request STDIN and guess pseudo-tty).
+.BR BOTH
+will always request both options.
+.BR STDIN
+will only pass the STDIN.
+.BR TTY
+will only allocate a pseudo-tty. And
+.BR NONE
+will request neither.
 .SH CAVEATS
 .P
 PHYSICAL/ABSOLUTE PATHS

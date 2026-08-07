@@ -1,5 +1,10 @@
 # safer TODO
 
+- Extend the behavior of the -s argument by implementing a new -t
+  argument to allow better control.
+  - Allow forcing the usage of both, none or one or another.
+  - By default pass the stdin but detect if the shell is a tty (with
+    test -t 1) to decide on pseudo-tty allocation.
 - Allow the definition of environment variables.
 - Allow to specify what environment variables should be passed from the
   shim environment to the tool in the container.
