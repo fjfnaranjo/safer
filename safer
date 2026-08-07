@@ -40,7 +40,7 @@ lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/shar
 persist_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 persist_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts e:p:kn:N:d:R:X:K:S:fsi:I:vh opt
+while getopts e:p:kn:N:d:R:X:K:a:fsi:I:vh opt
 do
 	case $opt in
 		e) entrypoint=$OPTARG ;;
@@ -52,7 +52,7 @@ do
 		R) runtime_cmd=$OPTARG ;;
 		X) runtime_args=$OPTARG ;;
 		K) persist_cmd=$OPTARG; persist=1 ;;
-		S) persist_stop_cmd=$OPTARG; persist=1 ;;
+		a) persist_stop_cmd=$OPTARG; persist=1 ;;
 		f) force=1 ;;
 		s) skip_tty=1 ;;
 		i) lib_image=$OPTARG ;;

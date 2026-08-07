@@ -117,6 +117,13 @@ if [ -n "$test_runtime" ]; then
 	diff tests/refs/persistent-prefixed tests/outputs/persistent-prefixed
 
 	# ---- TEST CASE ----
+	[ "$1" = "verbose" ] && echo "Persistent and custom arg..."
+	./safer -a "--other-safer-stop" persistent-arg safer-test-image-no-entrypoint
+	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-arg
+	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-arg
+	diff tests/refs/persistent-arg tests/outputs/persistent-arg
+
+	# ---- TEST CASE ----
 	[ "$1" = "verbose" ] && echo "Persistent and simple entrypoint..."
 	./safer -n safer-test-container-bin persistent-bin safer-test-image-bin
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-bin

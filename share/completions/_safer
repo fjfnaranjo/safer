@@ -30,7 +30,7 @@ _arguments \
   '-R[Runtime cli command. Override podman/docker detection]' \
   '-X[Runtime extra args]' \
   '-K[Command used to persist the container]' \
-  '-S[Argument injected to stop persisting containers]' \
+  '-a[Argument injected to stop persisting containers]' \
   '-f[Force script replacement]' \
   '-s[Skip container pseudo-tty allocation]' \
   '-i[Install a Containerfile from the library]:image:_safer_lib_images' \
