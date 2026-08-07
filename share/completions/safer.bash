@@ -5,7 +5,7 @@ _safer_complete() {
 
 	# -i
 	lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/share/safer}
-	if [[ "$prev" == "-i" ]]; then
+	if [[ "$prev" == -[iI] ]]; then
 		items=()
 		IFS=':' read -ra dirs <<< "$lib_path"
 		for dir in "${dirs[@]}"; do
@@ -21,7 +21,8 @@ _safer_complete() {
 
 	# -* options
 	if [[ "$cur" == -* ]]; then
-		opts="-e -p -k -n -d -R -X -K -a -f -s -i -v -h"
+		# Order: Non : options, then getopt
+		opts="-k -f -s -v -h -e -p -n -d -R -X -K -a -i"
 		COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
 		return
 	fi
@@ -36,7 +37,7 @@ _safer_complete() {
 			continue
 		fi
 		case "$w" in
-			-e|-p|-n|-d|-R|-X|-K|-a|-i)
+			-e|-p|-n|-N|-d|-R|-X|-K|-a|-i|-I)
 				skip_next=1
 				;;
 			-*)

@@ -26,6 +26,7 @@ _arguments \
   '-p[Port to expose]' \
   '-k[Run the tool in a persistent container]' \
   '-n[Use this name to persist the container]' \
+  '-N[Use this name + CWD to persist the container]' \
   '-d[Directory for the scripts]:dir:_path_files -/' \
   '-R[Runtime cli command. Override podman/docker detection]' \
   '-X[Runtime extra args]' \
@@ -34,6 +35,7 @@ _arguments \
   '-f[Force script replacement]' \
   '-s[Skip container pseudo-tty allocation]' \
   '-i[Install a Containerfile from the library]:image:_safer_lib_images' \
+  '-I[Install and build a Containerfile from the library]:image:_safer_lib_images' \
   '-v[Display the current version]' \
   '-h[Display usage and exit]' \
   ':cmd' \
