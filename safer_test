@@ -22,17 +22,21 @@ elif command -v docker >/dev/null 2>&1; then
 	test_runtime=docker
 fi
 
+usage=$(./safer -h)
+
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Illegal option..."
-if out=$(./safer -Z 2> /dev/null); then
+if out=$(./safer -Z); then
 	exit 1
 fi
+test "$out" = "$usage"
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Invalid call not detected by optargs..."
 if out=$(./safer only_one_arg); then
 	exit 1
 fi
+test "$out" = "$usage"
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Basic generation..."
@@ -109,17 +113,18 @@ diff tests/refs/tty-none tests/outputs/tty-none
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Invalid STDIN/pseudo-tty mode..."
-if out=$(./safer -t bogus bad_tty a_tool_image:latest 2> /dev/null); then
+if out=$(./safer -t bogus bad_tty a_tool_image:latest); then
 	exit 1
 fi
+test "$out" = "$usage"
 
 # Persistent containers
 if [ -n "$test_runtime" ]; then
 	if cd tests/image; then
-		$test_runtime build -f Containerfile.no-entrypoint -t safer-test-image-no-entrypoint . > /dev/null
-		$test_runtime build -f Containerfile.bin -t safer-test-image-bin . > /dev/null
-		$test_runtime build -f Containerfile.sh -t safer-test-image-sh . > /dev/null
-		cd - > /dev/null
+		$test_runtime build -f Containerfile.no-entrypoint -t safer-test-image-no-entrypoint . >/dev/null
+		$test_runtime build -f Containerfile.bin -t safer-test-image-bin . >/dev/null
+		$test_runtime build -f Containerfile.sh -t safer-test-image-sh . >/dev/null
+		cd - >/dev/null
 	fi
 
 	# ---- TEST CASE ----
@@ -171,9 +176,9 @@ if [ -n "$test_runtime" ]; then
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-complex
 	diff tests/refs/persistent-complex tests/outputs/persistent-complex
 
-	$test_runtime rmi safer-test-image-no-entrypoint > /dev/null
-	$test_runtime rmi safer-test-image-bin > /dev/null
-	$test_runtime rmi safer-test-image-sh > /dev/null
+	$test_runtime rmi safer-test-image-no-entrypoint >/dev/null
+	$test_runtime rmi safer-test-image-bin >/dev/null
+	$test_runtime rmi safer-test-image-sh >/dev/null
 fi
 
 export SAFER_LIB_PATH=tests/share
@@ -182,12 +187,12 @@ export SAFER_LIB_PATH=tests/share
 [ "$1" = "verbose" ] && echo "Library image..."
 expected=$(mktemp)
 actual=$(mktemp)
-cat > "$expected" <<EOF
+cat >"$expected" <<EOF
 Build script was installed. Review and build with:
 cat "tests/outputs/build/build_tool"
 (podman|docker) build -t "safer-build_tool:latest" -f "build_tool" "tests/outputs/build"
 EOF
-./safer -i build_tool > "$actual"
+./safer -i build_tool >"$actual"
 diff tests/share/images/build_tool tests/outputs/build/build_tool
 diff "$expected" "$actual"
 rm "$expected"
@@ -197,11 +202,11 @@ rm "$actual"
 [ "$1" = "verbose" ] && echo "Library image and build..."
 expected=$(mktemp)
 actual=$(mktemp)
-cat > "$expected" <<EOF
+cat >"$expected" <<EOF
 $ echo build -t "safer-build_tool_build:latest" -f "build_tool_build" "tests/outputs/build"
 build -t safer-build_tool_build:latest -f build_tool_build tests/outputs/build
 EOF
-SAFER_RT_CMD="echo" ./safer -I build_tool_build > "$actual"
+SAFER_RT_CMD="echo" ./safer -I build_tool_build >"$actual"
 diff tests/share/images/build_tool_build tests/outputs/build/build_tool_build
 diff "$expected" "$actual"
 rm "$expected"
@@ -224,14 +229,34 @@ test "$out" = "tests/outputs/build/build_tool_existing already exists."
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Do replace build file from library with -f..."
+expected=$(mktemp)
+actual=$(mktemp)
+cat >"$expected" <<EOF
+Build script was installed. Review and build with:
+cat "tests/outputs/build/build_tool_also_existing"
+(podman|docker) build -t "safer-build_tool_also_existing:latest" -f "build_tool_also_existing" "tests/outputs/build"
+EOF
 touch tests/outputs/build/build_tool_also_existing
-./safer -f -i build_tool_also_existing > /dev/null
+./safer -f -i build_tool_also_existing >"$actual"
 diff tests/share/images/build_tool_also_existing tests/outputs/build/build_tool_also_existing
+diff "$expected" "$actual"
+rm "$expected"
+rm "$actual"
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Get the build file from an alternative location..."
-SAFER_LIB_PATH=tests/share:tests/share_alt ./safer -i build_tool_alt > /dev/null
+expected=$(mktemp)
+actual=$(mktemp)
+cat >"$expected" <<EOF
+Build script was installed. Review and build with:
+cat "tests/outputs/build/build_tool_alt"
+(podman|docker) build -t "safer-build_tool_alt:latest" -f "build_tool_alt" "tests/outputs/build"
+EOF
+SAFER_LIB_PATH=tests/share:tests/share_alt ./safer -i build_tool_alt >"$actual"
 diff tests/share_alt/images/build_tool_alt tests/outputs/build/build_tool_alt
+diff "$expected" "$actual"
+rm "$expected"
+rm "$actual"
 
 # ---- TEST CASE ----
 [ "$1" = "verbose" ] && echo "Docker override..."
