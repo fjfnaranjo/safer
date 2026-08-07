@@ -18,7 +18,7 @@ Options:
  -k          Run the tool in a persistent container.
  -n name     Use this name to persist the container (implies -k).
  -f          Force script replacement.
- -s          Skip container pseudo-tty allocation.
+ -t MODE     Override the stdin/pseudo-tty behaviors.
  -i tool     Install a Containerfile from the library.
  -I tool     Install and build a Containerfile from the library.
  -v          Display the current version.
@@ -40,7 +40,7 @@ lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/shar
 persist_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 persist_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts e:p:kn:N:d:R:X:K:a:fsi:I:vh opt
+while getopts e:p:kn:N:d:R:X:K:a:ft:i:I:vh opt
 do
 	case $opt in
 		e) entrypoint=$OPTARG ;;
@@ -54,7 +54,7 @@ do
 		K) persist_cmd=$OPTARG; persist=1 ;;
 		a) persist_stop_cmd=$OPTARG; persist=1 ;;
 		f) force=1 ;;
-		s) skip_tty=1 ;;
+		t) tty_mode=$OPTARG ;;
 		i) lib_image=$OPTARG ;;
 		I) lib_image=$OPTARG; build=1 ;;
 		v) echo $version && exit ;;
@@ -65,6 +65,16 @@ do
 done
 
 shift $((OPTIND - 1))
+
+tty_mode=${tty_mode:-AUTO}
+case "$tty_mode" in
+	AUTO) guess_interactive_opts=1 ;;
+	BOTH) interactive_opts=-ti ;;
+	STDIN) interactive_opts=-i ;;
+	TTY) interactive_opts=-t ;;
+	NONE) ;;
+	*) echo "$usage"; exit 1 ;;
+esac
 
 # Section 2: Library commands
 
@@ -212,8 +222,11 @@ fi
 script_file=$(mktemp)
 cwd=$(pwd -P)
 
-interactive_flag=-ti
-[ "${skip_tty+x}" ] && interactive_flag=-i
+if [ "${guess_interactive_opts+x}" ]; then
+	flag_spec='$interactive_flags'
+else
+	flag_spec=$interactive_opts
+fi
 
 {
 	printf '#!/bin/sh\n'
@@ -223,6 +236,13 @@ interactive_flag=-ti
 	printf '\t"$project_dir/"*) ;;\n'
 	printf '\t*) echo "safer: $0: outside project dir" >&2; exit 1 ;;\n'
 	printf 'esac\n'
+
+	if [ "${guess_interactive_opts+x}" ]; then
+		printf 'interactive_flags=-i\n'
+		printf 'if [ -t 1 ]; then\n'
+		printf '\tinteractive_flags=-it\n'
+		printf 'fi\n'
+	fi
 
 	if [ -n "$container_name" ]; then
 		printf 'if [ "$*" = "%s" ]; then\n' "$persist_stop_cmd"
@@ -234,8 +254,10 @@ interactive_flag=-ti
 
 	if [ -n "$container_name" ]; then
 		printf '\t%s run --rm \\\n' "$runtime_cmd"
+	elif [ -n "$flag_spec" ]; then
+		printf '%s run --rm %s \\\n' "$runtime_cmd" "$flag_spec"
 	else
-		printf '%s run --rm %s \\\n' "$runtime_cmd" "$interactive_flag"
+		printf '%s run --rm \\\n' "$runtime_cmd"
 	fi
 
 	if [ -n "$runtime_args" ]; then
@@ -276,7 +298,11 @@ interactive_flag=-ti
 
 	if [ -n "$container_name" ]; then
 		printf 'fi\n'
-		printf '%s exec %s \\\n' "$runtime_cmd" "$interactive_flag"
+		if [ -n "$flag_spec" ]; then
+			printf '%s exec %s \\\n' "$runtime_cmd" "$flag_spec"
+		else
+			printf '%s exec \\\n' "$runtime_cmd"
+		fi
 		if [ -n "$runtime_args" ]; then
 			printf '\t%s \\\n' "$runtime_args"
 		fi

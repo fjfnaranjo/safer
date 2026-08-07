@@ -80,11 +80,38 @@ sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/entrypoint
 diff tests/refs/entrypoint tests/outputs/entrypoint
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Skip pseudo-tty..."
-./safer -s skip-tty a_tool_image:latest
-sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/skip-tty
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/skip-tty
-diff tests/refs/skip-tty tests/outputs/skip-tty
+[ "$1" = "verbose" ] && echo "STDIN/Pseudo-tty mode: BOTH..."
+./safer -t BOTH tty-both a_tool_image:latest
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/tty-both
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/tty-both
+diff tests/refs/tty-both tests/outputs/tty-both
+
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "STDIN/Pseudo-tty mode: STDIN..."
+./safer -t STDIN tty-stdin a_tool_image:latest
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/tty-stdin
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/tty-stdin
+diff tests/refs/tty-stdin tests/outputs/tty-stdin
+
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "STDIN/Pseudo-tty mode: TTY..."
+./safer -t TTY tty-tty a_tool_image:latest
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/tty-tty
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/tty-tty
+diff tests/refs/tty-tty tests/outputs/tty-tty
+
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "STDIN/Pseudo-tty mode: NONE..."
+./safer -t NONE tty-none a_tool_image:latest
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/tty-none
+[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/tty-none
+diff tests/refs/tty-none tests/outputs/tty-none
+
+# ---- TEST CASE ----
+[ "$1" = "verbose" ] && echo "Invalid STDIN/pseudo-tty mode..."
+if out=$(./safer -t bogus bad_tty a_tool_image:latest 2> /dev/null); then
+	exit 1
+fi
 
 # Persistent containers
 if [ -n "$test_runtime" ]; then
@@ -139,7 +166,7 @@ if [ -n "$test_runtime" ]; then
 
 	# ---- TEST CASE ----
 	[ "$1" = "verbose" ] && echo "Persistent and sh entrypoint plus most of the flags..."
-	./safer -p 10443 -e /bin/other_bin -n safer-test-container-complex -s persistent-complex safer-test-image-sh /vol/1 /vol/2
+	./safer -p 10443 -e /bin/other_bin -n safer-test-container-complex -t STDIN persistent-complex safer-test-image-sh /vol/1 /vol/2
 	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-complex
 	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-complex
 	diff tests/refs/persistent-complex tests/outputs/persistent-complex

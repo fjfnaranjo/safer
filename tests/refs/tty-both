@@ -4,11 +4,7 @@ case "$(pwd -P)/" in
 	"$project_dir/"*) ;;
 	*) echo "safer: $0: outside project dir" >&2; exit 1 ;;
 esac
-interactive_flags=-i
-if [ -t 1 ]; then
-	interactive_flags=-it
-fi
-podman run --rm $interactive_flags \
+podman run --rm -ti \
 	-v "CWD":"CWD" \
 	-w "$(pwd -P)" \
 	a_tool_image:latest "$@"

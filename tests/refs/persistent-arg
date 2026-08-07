@@ -4,6 +4,10 @@ case "$(pwd -P)/" in
 	"$project_dir/"*) ;;
 	*) echo "safer: $0: outside project dir" >&2; exit 1 ;;
 esac
+interactive_flags=-i
+if [ -t 1 ]; then
+	interactive_flags=-it
+fi
 if [ "$*" = "--other-safer-stop" ]; then
 	podman kill persistent-arg-safer
 	exit
@@ -16,6 +20,6 @@ if ! podman container inspect persistent-arg-safer >/dev/null 2>&1; then
 		-d --name "persistent-arg-safer" \
 		safer-test-image-no-entrypoint sleep inf
 fi
-podman exec -ti \
+podman exec $interactive_flags \
 	-w "$(pwd -P)" \
 	persistent-arg-safer "$@"

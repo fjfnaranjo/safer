@@ -4,7 +4,11 @@ case "$(pwd -P)/" in
 	"$project_dir/"*) ;;
 	*) echo "safer: $0: outside project dir" >&2; exit 1 ;;
 esac
-docker run --rm -ti \
+interactive_flags=-i
+if [ -t 1 ]; then
+	interactive_flags=-it
+fi
+docker run --rm $interactive_flags \
 	--user "$(id -u):$(id -g)" \
 	-v "CWD":"CWD" \
 	-w "$(pwd -P)" \

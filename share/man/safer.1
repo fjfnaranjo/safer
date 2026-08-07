@@ -84,8 +84,8 @@ Docker default: --user "$(id -u):$(id -g)"
 .BR \-f
 Force script replacement.
 .TP
-.BR \-s
-Skip container pseudo-tty allocation.
+.BR \-t " (AUTO|BOTH|STDIN|TTY|NONE)"
+Override the stdin/pseudo-tty behaviors.
 .TP
 .BR \-i " tool"
 Install a Containerfile from the library.
