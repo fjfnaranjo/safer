@@ -13,7 +13,7 @@ Arguments:
 For the full list of Options and Environment Vars, see the man page.
 
 Options:
- -e cmd      Tool entrypoint in the image.
+ -x cmd      Tool entrypoint in the image.
  -p n[:n]    Port to expose.
  -k          Run the tool in a persistent container.
  -n name     Use this name to persist the container (implies -k).
@@ -40,10 +40,10 @@ lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/shar
 persist_cmd="${SAFER_PERSIST_CMD:-sleep inf}"
 persist_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts e:p:kn:N:d:R:X:K:a:ft:i:I:vh opt
+while getopts x:p:kn:N:d:R:X:K:a:ft:i:I:vh opt
 do
 	case $opt in
-		e) entrypoint=$OPTARG ;;
+		x) entrypoint=$OPTARG ;;
 		p) port=$OPTARG ;;
 		k) persist=1 ;;
 		n) container_name=$OPTARG; persist=1 ;;

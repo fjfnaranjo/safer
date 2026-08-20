@@ -28,7 +28,7 @@ _safer_complete() {
 	# -* options
 	if [[ "$cur" == -* ]]; then
 		# Order: Non : options, then getopt
-		opts="-k -f -t -v -h -e -p -n -d -R -X -K -a -i"
+		opts="-k -f -t -v -h -x -p -n -d -R -X -K -a -i"
 		COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
 		return
 	fi
@@ -43,7 +43,7 @@ _safer_complete() {
 			continue
 		fi
 		case "$w" in
-			-e|-p|-n|-N|-d|-R|-X|-K|-a|-t|-i|-I)
+			-x|-p|-n|-N|-d|-R|-X|-K|-a|-t|-i|-I)
 				skip_next=1
 				;;
 			-*)

@@ -22,7 +22,7 @@ _safer_list_images() {
 }
 
 _arguments \
-  '-e[Tool entrypoint in the image]' \
+  '-x[Tool entrypoint in the image]' \
   '-p[Port to expose]' \
   '-k[Run the tool in a persistent container]' \
   '-n[Use this name to persist the container]' \
