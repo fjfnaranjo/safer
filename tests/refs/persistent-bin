@@ -9,17 +9,17 @@ if [ -t 1 ]; then
 	interactive_flags=-it
 fi
 if [ "$*" = "--safer-stop" ]; then
-	podman kill safer-test-container-bin
+	docker kill safer-test-container-bin
 	exit
 fi
-if ! podman container inspect safer-test-container-bin >/dev/null 2>&1; then
-	podman run --rm \
+if ! docker container inspect safer-test-container-bin >/dev/null 2>&1; then
+	docker run --rm \
 		--entrypoint '' \
 		-v "CWD":"CWD" \
 		-w "$project_dir" \
 		-d --name "safer-test-container-bin" \
 		safer-test-image-bin sleep inf
 fi
-podman exec $interactive_flags \
+docker exec $interactive_flags \
 	-w "$(pwd -P)" \
 	safer-test-container-bin '/usr/local/some_bin' "$@"

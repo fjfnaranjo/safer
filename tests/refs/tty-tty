@@ -4,7 +4,8 @@ case "$(pwd -P)/" in
 	"$project_dir/"*) ;;
 	*) echo "safer: $0: outside project dir" >&2; exit 1 ;;
 esac
-podman run --rm -t \
+docker run --rm -t \
+	--user "$(id -u):$(id -g)" \
 	-v "CWD":"CWD" \
 	-w "$(pwd -P)" \
 	a_tool_image:latest "$@"

@@ -9,17 +9,17 @@ if [ -t 1 ]; then
 	interactive_flags=-it
 fi
 if [ "$*" = "--other-safer-stop" ]; then
-	podman kill persistent-arg-safer
+	docker kill persistent-arg-safer
 	exit
 fi
-if ! podman container inspect persistent-arg-safer >/dev/null 2>&1; then
-	podman run --rm \
+if ! docker container inspect persistent-arg-safer >/dev/null 2>&1; then
+	docker run --rm \
 		--entrypoint '' \
 		-v "CWD":"CWD" \
 		-w "$project_dir" \
 		-d --name "persistent-arg-safer" \
 		safer-test-image-no-entrypoint sleep inf
 fi
-podman exec $interactive_flags \
+docker exec $interactive_flags \
 	-w "$(pwd -P)" \
 	persistent-arg-safer "$@"

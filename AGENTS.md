@@ -45,15 +45,18 @@ The project should follow POSIX shell standards. Use `shellcheck` with POSIX mod
 # macOS: brew install shellcheck
 # Alpine: apk add shellcheck
 
-# Run shellcheck with POSIX dialect
+# Run shellcheck with POSIX dialect (no echo, check $?)
 make check
 ```
 
 ### Testing
 
 ```sh
-# Run the test suite
+# Run tests (will use a container runtime)
 make test-verbose
+
+# Run non-rt tests (partial run, will not use a container runtime)
+make test-non-rt-verbose
 ```
 
 The project implements tests using a set of "expected" files in `tests/refs`. Then, in a `Makefile`, a `test-verbose` target runs a simple suite of `safer` invocations pointing it to `tests/outputs` and, for most cases, running the `diff` command directly between each item ref and its output. In other cases, the status code or the program output is checked.

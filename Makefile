@@ -11,6 +11,14 @@ test:
 test-verbose:
 	@./safer_test verbose
 
+.PHONY: test-non-rt
+test-non-rt:
+	@./safer_test non-rt
+
+.PHONY: test-non-rt-verbose
+test-non-rt-verbose:
+	@./safer_test non-rt verbose
+
 .PHONY: pack
 pack:
 	@install -Dm755 safer "dist/safer-$${SAFER_VERSION:-0.0-dev}/bin/safer"

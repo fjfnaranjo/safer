@@ -5,188 +5,148 @@ set -e
 rm -rf tests/outputs
 mkdir -p tests/outputs
 
-# PATH definition
-test "PATH=\".safer:\$PATH\"" = "$(./safer)"
+expected=$(mktemp)
+expected_err=$(mktemp)
+actual=$(mktemp)
+actual_err=$(mktemp)
 
-# PATH definition with -d
-test "PATH=\"tests:\$PATH\"" = "$(./safer -d tests)"
+for arg in "$@"; do
+	case "$arg" in
+		verbose) verbose=1 ;;
+		non-rt) non_rt=1 ;;
+	esac
+done
 
-export SAFER_DIR=tests/outputs
-
-# PATH definition with env var
-test "PATH=\"tests/outputs:\$PATH\"" = "$(./safer)"
-
-if command -v podman >/dev/null 2>&1; then
+if [ "${SAFER_TEST_RT_CMD:+x}" ]; then
+	test_runtime="$SAFER_TEST_RT_CMD"
+elif [ "${SAFER_RT_CMD:+x}" ]; then
+	test_runtime="$SAFER_RT_CMD"
+elif command -v podman >/dev/null 2>&1; then
 	test_runtime=podman
 elif command -v docker >/dev/null 2>&1; then
 	test_runtime=docker
 fi
 
+# Normalize container runtime for tests
+SAFER_RT_CMD=docker
+export SAFER_RT_CMD
+
+# Test env
+SAFER_DIR=tests/outputs
+export SAFER_DIR
+SAFER_LIB_PATH=tests/share
+export SAFER_LIB_PATH
+
+# Usage text for reference
+[ "${verbose:+x}" ] && echo "Grabbing usage text..."
 usage=$(./safer -h)
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Illegal option..."
-if out=$(./safer -Z); then
-	exit 1
-fi
-test "$out" = "$usage"
+[ "${verbose:+x}" ] && echo "PATH definition..."
+test "PATH=\".safer:\$PATH\"" = "$(unset SAFER_DIR && ./safer)"
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Invalid call not detected by optargs..."
-if out=$(./safer only_one_arg); then
-	exit 1
-fi
-test "$out" = "$usage"
+[ "${verbose:+x}" ] && echo "PATH definition with -d override..."
+test "PATH=\"tests:\$PATH\"" = "$(./safer -d tests)"
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Basic generation..."
+[ "${verbose:+x}" ] && echo "PATH definition with env override..."
+test "PATH=\"tests/outputs:\$PATH\"" = "$(./safer)"
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Illegal option..."
+if ./safer -Z >"$actual" 2>"$actual_err"; then
+	exit 1
+fi
+echo "$usage" > "$expected"
+diff "$expected" "$actual"
+echo "Illegal option -Z" > "$expected_err"
+diff "$expected_err" "$actual_err"
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Invalid call not detected by optargs..."
+if ./safer only_one_arg >"$actual"; then
+	exit 1
+fi
+echo "$usage" > "$expected"
+diff "$expected" "$actual"
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Basic generation..."
 ./safer basic a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/basic
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/basic
 diff tests/refs/basic tests/outputs/basic
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Target other dir and use underscores..."
+[ "${verbose:+x}" ] && echo "Target other dir and use underscores..."
 ./safer -d tests/outputs/alt dest a_tool_image:latest
 test -e "tests/outputs/alt/dest"
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Don't replace existing scripts..."
+[ "${verbose:+x}" ] && echo "Don't replace existing scripts..."
 touch tests/outputs/existing_basic
-if out=$(./safer existing_basic a_tool_image:latest); then
+if ./safer existing_basic a_tool_image:latest >"$actual"; then
 	exit 1
 fi
-test "$out" = "tests/outputs/existing_basic already exists."
+echo "tests/outputs/existing_basic already exists." > "$expected"
+diff "$expected" "$actual"
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Do replace existing scripts with -f..."
+[ "${verbose:+x}" ] && echo "Do replace existing scripts with -f..."
 touch tests/outputs/also_existing_basic
 ./safer -f also_existing_basic a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/also_existing_basic
-[ "$1" = "verbose" ] && echo "Generation with port..."
+[ "${verbose:+x}" ] && echo "Generation with port..."
 ./safer -p 10443 port a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/port
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/port
 diff tests/refs/port tests/outputs/port
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Extra volumes..."
+[ "${verbose:+x}" ] && echo "Extra volumes..."
 ./safer volumes a_tool_image:latest /vol/1 /vol/2
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/volumes
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/volumes
 diff tests/refs/volumes tests/outputs/volumes
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Custom entrypoint..."
+[ "${verbose:+x}" ] && echo "Custom entrypoint..."
 ./safer -x /bin/other_bin entrypoint a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/entrypoint
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/entrypoint
 diff tests/refs/entrypoint tests/outputs/entrypoint
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "STDIN/Pseudo-tty mode: BOTH..."
+[ "${verbose:+x}" ] && echo "STDIN/Pseudo-tty mode: BOTH..."
 ./safer -t BOTH tty-both a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/tty-both
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/tty-both
 diff tests/refs/tty-both tests/outputs/tty-both
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "STDIN/Pseudo-tty mode: STDIN..."
+[ "${verbose:+x}" ] && echo "STDIN/Pseudo-tty mode: STDIN..."
 ./safer -t STDIN tty-stdin a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/tty-stdin
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/tty-stdin
 diff tests/refs/tty-stdin tests/outputs/tty-stdin
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "STDIN/Pseudo-tty mode: TTY..."
+[ "${verbose:+x}" ] && echo "STDIN/Pseudo-tty mode: TTY..."
 ./safer -t TTY tty-tty a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/tty-tty
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/tty-tty
 diff tests/refs/tty-tty tests/outputs/tty-tty
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "STDIN/Pseudo-tty mode: NONE..."
+[ "${verbose:+x}" ] && echo "STDIN/Pseudo-tty mode: NONE..."
 ./safer -t NONE tty-none a_tool_image:latest
 sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/tty-none
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/tty-none
 diff tests/refs/tty-none tests/outputs/tty-none
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Invalid STDIN/pseudo-tty mode..."
-if out=$(./safer -t bogus bad_tty a_tool_image:latest); then
+[ "${verbose:+x}" ] && echo "Invalid STDIN/pseudo-tty mode..."
+if ./safer -t bogus bad_tty a_tool_image:latest >"$actual"; then
 	exit 1
 fi
-test "$out" = "$usage"
-
-# Persistent containers
-if [ -n "$test_runtime" ]; then
-	if cd tests/image; then
-		$test_runtime build -f Containerfile.no-entrypoint -t safer-test-image-no-entrypoint . >/dev/null
-		$test_runtime build -f Containerfile.bin -t safer-test-image-bin . >/dev/null
-		$test_runtime build -f Containerfile.sh -t safer-test-image-sh . >/dev/null
-		cd - >/dev/null
-	fi
-
-	# ---- TEST CASE ----
-	[ "$1" = "verbose" ] && echo "Persistent..."
-	./safer -k persistent safer-test-image-no-entrypoint
-	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent
-	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent
-	diff tests/refs/persistent tests/outputs/persistent
-
-	# ---- TEST CASE ----
-	[ "$1" = "verbose" ] && echo "Persistent and named..."
-	./safer -n safer-test-container-named persistent-named safer-test-image-no-entrypoint
-	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-named
-	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-named
-	diff tests/refs/persistent-named tests/outputs/persistent-named
-
-	# ---- TEST CASE ----
-	[ "$1" = "verbose" ] && echo "Persistent and prefixed..."
-	./safer -N safer-test-container-prefixed persistent-prefixed safer-test-image-no-entrypoint
-	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-prefixed
-	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-prefixed
-	diff tests/refs/persistent-prefixed tests/outputs/persistent-prefixed
-
-	# ---- TEST CASE ----
-	[ "$1" = "verbose" ] && echo "Persistent and custom arg..."
-	./safer -a "--other-safer-stop" persistent-arg safer-test-image-no-entrypoint
-	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-arg
-	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-arg
-	diff tests/refs/persistent-arg tests/outputs/persistent-arg
-
-	# ---- TEST CASE ----
-	[ "$1" = "verbose" ] && echo "Persistent and simple entrypoint..."
-	./safer -n safer-test-container-bin persistent-bin safer-test-image-bin
-	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-bin
-	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-bin
-	diff tests/refs/persistent-bin tests/outputs/persistent-bin
-
-	# ---- TEST CASE ----
-	[ "$1" = "verbose" ] && echo "Persistent and sh entrypoint..."
-	./safer -n safer-test-container-sh persistent-sh safer-test-image-sh
-	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-sh
-	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-sh
-	diff tests/refs/persistent-sh tests/outputs/persistent-sh
-
-	# ---- TEST CASE ----
-	[ "$1" = "verbose" ] && echo "Persistent and sh entrypoint plus most of the flags..."
-	./safer -p 10443 -x /bin/other_bin -n safer-test-container-complex -t STDIN persistent-complex safer-test-image-sh /vol/1 /vol/2
-	sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-complex
-	[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/persistent-complex
-	diff tests/refs/persistent-complex tests/outputs/persistent-complex
-
-	$test_runtime rmi safer-test-image-no-entrypoint >/dev/null
-	$test_runtime rmi safer-test-image-bin >/dev/null
-	$test_runtime rmi safer-test-image-sh >/dev/null
-fi
-
-export SAFER_LIB_PATH=tests/share
+echo "$usage" > "$expected"
+diff "$expected" "$actual"
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Library image..."
-expected=$(mktemp)
-actual=$(mktemp)
+[ "${verbose:+x}" ] && echo "Library image..."
 cat >"$expected" <<EOF
 Build script was installed. Review and build with:
 cat "tests/outputs/build/build_tool"
@@ -195,13 +155,9 @@ EOF
 ./safer -i build_tool >"$actual"
 diff tests/share/images/build_tool tests/outputs/build/build_tool
 diff "$expected" "$actual"
-rm "$expected"
-rm "$actual"
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Library image and build..."
-expected=$(mktemp)
-actual=$(mktemp)
+[ "${verbose:+x}" ] && echo "Library image and build..."
 cat >"$expected" <<EOF
 $ echo build -t "safer-build_tool_build:latest" -f "build_tool_build" "tests/outputs/build"
 build -t safer-build_tool_build:latest -f build_tool_build tests/outputs/build
@@ -209,18 +165,16 @@ EOF
 SAFER_RT_CMD="echo" ./safer -I build_tool_build >"$actual"
 diff tests/share/images/build_tool_build tests/outputs/build/build_tool_build
 diff "$expected" "$actual"
-rm "$expected"
-rm "$actual"
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Missing library image..."
+[ "${verbose:+x}" ] && echo "Missing library image..."
 if out=$(./safer -i not_a_lib_image); then
 	exit 1
 fi
 test "$out" = "not_a_lib_image image not found in library."
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Don't replace build file from library..."
+[ "${verbose:+x}" ] && echo "Don't replace build file from library..."
 touch tests/outputs/build/build_tool_existing
 if out=$(./safer -i build_tool_existing); then
 	exit 1
@@ -228,9 +182,7 @@ fi
 test "$out" = "tests/outputs/build/build_tool_existing already exists."
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Do replace build file from library with -f..."
-expected=$(mktemp)
-actual=$(mktemp)
+[ "${verbose:+x}" ] && echo "Do replace build file from library with -f..."
 cat >"$expected" <<EOF
 Build script was installed. Review and build with:
 cat "tests/outputs/build/build_tool_also_existing"
@@ -240,13 +192,9 @@ touch tests/outputs/build/build_tool_also_existing
 ./safer -f -i build_tool_also_existing >"$actual"
 diff tests/share/images/build_tool_also_existing tests/outputs/build/build_tool_also_existing
 diff "$expected" "$actual"
-rm "$expected"
-rm "$actual"
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Get the build file from an alternative location..."
-expected=$(mktemp)
-actual=$(mktemp)
+[ "${verbose:+x}" ] && echo "Get the build file from an alternative location..."
 cat >"$expected" <<EOF
 Build script was installed. Review and build with:
 cat "tests/outputs/build/build_tool_alt"
@@ -255,19 +203,105 @@ EOF
 SAFER_LIB_PATH=tests/share:tests/share_alt ./safer -i build_tool_alt >"$actual"
 diff tests/share_alt/images/build_tool_alt tests/outputs/build/build_tool_alt
 diff "$expected" "$actual"
-rm "$expected"
-rm "$actual"
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Docker override..."
-SAFER_RT_CMD="docker" ./safer docker_rt a_tool_image:latest
-sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/docker_rt
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/docker_rt
-diff tests/refs/docker_rt tests/outputs/docker_rt
+[ "${verbose:+x}" ] && echo "Runtime override..."
+SAFER_RT_CMD="non-docker" ./safer rt_override a_tool_image:latest
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/rt_override
+diff tests/refs/rt_override tests/outputs/rt_override
 
 # ---- TEST CASE ----
-[ "$1" = "verbose" ] && echo "Docker override (sudo + no args)..."
-SAFER_RT_CMD="sudo docker" SAFER_RT_ARGS="" ./safer docker_rt_sudo_no_args a_tool_image:latest
-sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/docker_rt_sudo_no_args
-[ "$test_runtime" = "docker" ] && sed -i 's|docker|podman|g' tests/outputs/docker_rt_sudo_no_args
-diff tests/refs/docker_rt_sudo_no_args tests/outputs/docker_rt_sudo_no_args
+[ "${verbose:+x}" ] && echo "Runtime and args override (sudo docker + no args)..."
+SAFER_RT_CMD="sudo docker" SAFER_RT_ARGS="" ./safer rt_override_sudo_no_args a_tool_image:latest
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/rt_override_sudo_no_args
+diff tests/refs/rt_override_sudo_no_args tests/outputs/rt_override_sudo_no_args
+
+# Early exit for tests dependant on a container runtime
+if [ "${non_rt:+x}" ]; then
+	echo "Warning: Partial run. Skipping tests requiring a container runtime."
+	rm -f "$expected"
+	rm -f "$expected_err"
+	rm -f "$actual"
+	rm -f "$actual_err"
+	exit
+fi
+
+# Use tests actual container runtime for tests
+SAFER_RT_CMD="$test_runtime"
+export SAFER_RT_CMD
+
+# Unrealiable hack: We remove the RT args here and in refs when running
+# using podman. Docker test runs are running with overriden args too.
+# Should not be a problem unless tests dependant on uid/gid are added
+# in the future.
+if [ "$test_runtime" = "podman" ]; then
+	SAFER_RT_ARGS=""
+	export SAFER_RT_ARGS
+fi
+
+# Create fake container images
+if cd tests/image; then
+	$test_runtime build -f Containerfile.no-entrypoint -t safer-test-image-no-entrypoint . >/dev/null
+	$test_runtime build -f Containerfile.bin -t safer-test-image-bin . >/dev/null
+	$test_runtime build -f Containerfile.sh -t safer-test-image-sh . >/dev/null
+	cd - >/dev/null
+fi
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Persistent..."
+./safer -k persistent safer-test-image-no-entrypoint
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent
+[ "$test_runtime" = "podman" ] && sed -i 's|podman|docker|g' tests/outputs/persistent
+diff tests/refs/persistent tests/outputs/persistent
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Persistent and named..."
+./safer -n safer-test-container-named persistent-named safer-test-image-no-entrypoint
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-named
+[ "$test_runtime" = "podman" ] && sed -i 's|podman|docker|g' tests/outputs/persistent-named
+diff tests/refs/persistent-named tests/outputs/persistent-named
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Persistent and prefixed..."
+./safer -N safer-test-container-prefixed persistent-prefixed safer-test-image-no-entrypoint
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-prefixed
+[ "$test_runtime" = "podman" ] && sed -i 's|podman|docker|g' tests/outputs/persistent-prefixed
+diff tests/refs/persistent-prefixed tests/outputs/persistent-prefixed
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Persistent and custom arg..."
+./safer -a "--other-safer-stop" persistent-arg safer-test-image-no-entrypoint
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-arg
+[ "$test_runtime" = "podman" ] && sed -i 's|podman|docker|g' tests/outputs/persistent-arg
+diff tests/refs/persistent-arg tests/outputs/persistent-arg
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Persistent and simple entrypoint..."
+./safer -n safer-test-container-bin persistent-bin safer-test-image-bin
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-bin
+[ "$test_runtime" = "podman" ] && sed -i 's|podman|docker|g' tests/outputs/persistent-bin
+diff tests/refs/persistent-bin tests/outputs/persistent-bin
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Persistent and sh entrypoint..."
+./safer -n safer-test-container-sh persistent-sh safer-test-image-sh
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-sh
+[ "$test_runtime" = "podman" ] && sed -i 's|podman|docker|g' tests/outputs/persistent-sh
+diff tests/refs/persistent-sh tests/outputs/persistent-sh
+
+# ---- TEST CASE ----
+[ "${verbose:+x}" ] && echo "Persistent and sh entrypoint plus most of the flags..."
+./safer -p 10443 -x /bin/other_bin -n safer-test-container-complex -t STDIN persistent-complex safer-test-image-sh /vol/1 /vol/2
+sed -i 's|'"$(pwd)"'|CWD|g' tests/outputs/persistent-complex
+[ "$test_runtime" = "podman" ] && sed -i 's|podman|docker|g' tests/outputs/persistent-complex
+diff tests/refs/persistent-complex tests/outputs/persistent-complex
+
+# Cleanup fake container images
+$test_runtime rmi safer-test-image-no-entrypoint >/dev/null
+$test_runtime rmi safer-test-image-bin >/dev/null
+$test_runtime rmi safer-test-image-sh >/dev/null
+
+rm -f "$expected"
+rm -f "$expected_err"
+rm -f "$actual"
+rm -f "$actual_err"

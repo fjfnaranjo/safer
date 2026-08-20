@@ -8,8 +8,7 @@ interactive_flags=-i
 if [ -t 1 ]; then
 	interactive_flags=-it
 fi
-docker run --rm $interactive_flags \
-	--user "$(id -u):$(id -g)" \
+non-docker run --rm $interactive_flags \
 	-v "CWD":"CWD" \
 	-w "$(pwd -P)" \
 	a_tool_image:latest "$@"
