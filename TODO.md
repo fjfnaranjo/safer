@@ -1,8 +1,7 @@
 # safer TODO
 
-- Allow the definition of environment variables.
-- Allow to specify what environment variables should be passed from the
-  shim environment to the tool in the container.
+- Environment variables (`-e` as Docker/Podman `--env`).
+- Allow multiple values for `-p` and `-e`.
 - Implement a criteria for the image library.
   - Rolling release strategy.
   - Templates for language specific distribution tools and other
