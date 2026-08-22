@@ -1,3 +1,3 @@
 FROM node:23-alpine3.21
-RUN npm -g install prettier
+RUN npm -g --no-cache install prettier
 ENTRYPOINT ["/usr/local/bin/prettier"]
