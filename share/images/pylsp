@@ -1,3 +1,5 @@
 FROM alpine:edge
-RUN apk add --no-cache pipx && pipx install python-lsp-server --global
+RUN apk add --no-cache pipx \
+    && pipx install python-lsp-server --global \
+    && rm -rf /root/.cache/pip
 ENTRYPOINT ["/usr/local/bin/pylsp"]
