@@ -10,7 +10,7 @@ if [ -t 1 ]; then
 fi
 docker run --rm $interactive_flags \
 	--user "$(id -u):$(id -g)" \
-	-p "10443:10443" \
+	-p "10443" \
 	-v "CWD":"CWD" \
 	-w "$(pwd -P)" \
 	a_tool_image:latest "$@"

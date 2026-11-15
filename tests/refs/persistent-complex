@@ -11,7 +11,7 @@ fi
 if ! docker container inspect safer-test-container-complex >/dev/null 2>&1; then
 	docker run --rm \
 		--entrypoint '' \
-		-p "10443:10443" \
+		-p "10443" \
 		-v "CWD":"CWD" \
 		-w "$project_dir" \
 		-v "/vol/1":"/vol/1" \

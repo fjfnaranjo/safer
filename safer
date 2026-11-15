@@ -14,7 +14,7 @@ For the full list of Options and Environment Vars, see the man page.
 
 Options:
  -x cmd      Tool entrypoint in the image.
- -p n[:n]    Port to expose.
+ -p p-spec   Container port to publish (repeatable).
  -k          Run the tool in a persistent container.
  -n name     Use this name to persist the container (implies -k).
  -f          Force script replacement.
@@ -44,7 +44,13 @@ while getopts x:p:kn:N:d:R:X:K:a:ft:i:I:vh opt
 do
 	case $opt in
 		x) entrypoint=$OPTARG ;;
-		p) port=$OPTARG ;;
+		p)
+			if [ "${port_map+x}" ]; then
+				port_map=$(printf '%s\n%s' "$port_map" "$OPTARG")
+			else
+				port_map=$OPTARG
+			fi
+			;;
 		k) persist=1 ;;
 		n) container_name=$OPTARG; persist=1 ;;
 		N) container_base_name=$OPTARG; persist=1 ;;
@@ -165,13 +171,6 @@ if [ -e "$script_dest" ] && [ -z "$force" ]; then
 	exit 1
 fi
 
-if [ -n "$port" ]; then
-	case "$port" in
-		*:*) port_map="$port" ;;
-		*) port_map="$port:$port" ;;
-	esac
-fi
-
 if [ "${persist+x}" ]; then
 	if [ -z "$container_name" ]; then
 		clean_cwd="$(echo "${PWD##*/}" | tr -cd '[:alnum:]')"
@@ -286,7 +285,10 @@ fi
 	fi
 
 	if [ -n "$port_map" ]; then
-		printf '%b\t-p "%s" \\\n' "$pad" "$port_map"
+		printf '%s\n' "$port_map" |
+		while IFS= read -r a_port; do
+			printf '%b\t-p "%s" \\\n' "$pad" "$a_port"
+		done
 	fi
 
 	printf '%b\t-v "%s":"%s" \\\n' "$pad" "$cwd" "$cwd"

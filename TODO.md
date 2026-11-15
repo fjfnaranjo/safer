@@ -1,7 +1,6 @@
 # safer TODO
 
-- Environment variables (`-e` as Docker/Podman `--env`).
-- Allow multiple values for `-p` and `-e`.
+- Multiple environment variables (`-e` as Docker/Podman `--env`).
 - Implement a criteria for the image library.
   - Rolling release strategy.
   - Templates for language specific distribution tools and other
