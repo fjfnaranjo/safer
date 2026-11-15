@@ -1,8 +1,6 @@
 # safer TODO
 
-- Always provide the PATH suggestion (on plain command invocation) using
-  an absolute path. If the SAFER_DIR is defined as relative, resolve the
-  suggestion to the current directory.
+- Quote arguments in commands proposed by `safer`.
 - Avoid stdout/stderr corruption when running persistent containers:
   - `(container-name) sleep inf >/dev/null 2>&1`
 - Environment variables (`-e` as Docker/Podman `--env`).

@@ -206,4 +206,5 @@ PHYSICAL/ABSOLUTE PATHS
 .B safer
 enforces absolute paths in scripts generation. This is consistent with
 how container runtimes work but may break host tools if they need path
-information from inside the container.
+information from inside the container. It will also force absolute paths
+for the PATH variable definition on plain invocation.

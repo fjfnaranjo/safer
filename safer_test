@@ -150,18 +150,29 @@ test_runs_and_generates_patch () {
 
 # Test case
 ( unset SAFER_DIR
-test_runs_and_stdout "PATH definition" \
-	'PATH=".safer:$PATH"' \
+test_runs_and_stdout "PATH definition default" \
+	"PATH=\"$(pwd -P)/.safer:\$PATH\"" \
 	./safer )
 
 # Test case
 test_runs_and_stdout "PATH definition with -d override" \
-	'PATH="tests:$PATH"' \
+	'PATH="/path/to/scripts:$PATH"' \
+	./safer -d /path/to/scripts
+
+# Test case
+test_runs_and_stdout "PATH definition with relative -d override" \
+	"PATH=\"$(pwd -P)/tests:\$PATH\"" \
 	./safer -d tests
 
 # Test case
+SAFER_DIR=/path/to/scripts/env \
 test_runs_and_stdout "PATH definition with env override" \
-	'PATH="tests/outputs:$PATH"' \
+	'PATH="/path/to/scripts/env:$PATH"' \
+	./safer
+
+# Test case
+test_runs_and_stdout "PATH definition with relative env override" \
+	"PATH=\"$(pwd -P)/tests/outputs:\$PATH\"" \
 	./safer
 
 # Test case
@@ -187,7 +198,7 @@ test_runs_and_generates "Target other dir and use underscores" \
 # Test case
 touch tests/outputs/existing_basic
 test_fails_and_stdout "Don't replace existing scripts" \
-	"tests/outputs/existing_basic already exists." \
+	"$(pwd -P)/tests/outputs/existing_basic already exists." \
 	./safer existing_basic a_tool_image:latest
 
 # Test case
@@ -240,8 +251,8 @@ test_fails_and_stdout "Invalid STDIN/pseudo-tty mode" \
 test_runs_and_stdout_and_generates "Library image" \
 	"$(cat <<EOF
 Build script was installed. Review and build with:
-cat "tests/outputs/build/build_tool"
-(podman|docker) build -t "safer-build_tool:latest" -f "build_tool" "tests/outputs/build"
+cat "$(pwd -P)/tests/outputs/build/build_tool"
+(podman|docker) build -t "safer-build_tool:latest" -f "build_tool" "$(pwd -P)/tests/outputs/build"
 EOF
 )" \
 	"share/images/build_tool" "outputs/build/build_tool" \
@@ -251,8 +262,8 @@ EOF
 SAFER_RT_CMD="echo" \
 	test_runs_and_stdout_and_generates "Library image and build" \
 	"$(cat <<EOF
-$ echo build -t "safer-build_tool_build:latest" -f "build_tool_build" "tests/outputs/build"
-build -t safer-build_tool_build:latest -f build_tool_build tests/outputs/build
+$ echo build -t "safer-build_tool_build:latest" -f "build_tool_build" "$(pwd -P)/tests/outputs/build"
+build -t safer-build_tool_build:latest -f build_tool_build $(pwd -P)/tests/outputs/build
 EOF
 )" \
 	"share/images/build_tool_build" "outputs/build/build_tool_build" \
@@ -266,7 +277,7 @@ test_fails_and_stdout "Missing library image" \
 # Test case
 touch tests/outputs/build/build_tool_existing
 test_fails_and_stdout "Don't replace build file from library" \
-	"tests/outputs/build/build_tool_existing already exists." \
+	"$(pwd -P)/tests/outputs/build/build_tool_existing already exists." \
 	./safer -i build_tool_existing
 
 # Test case
@@ -274,8 +285,8 @@ touch tests/outputs/build/build_tool_also_existing
 test_runs_and_stdout_and_generates "Do replace build file from library with -f" \
 	"$(cat <<EOF
 Build script was installed. Review and build with:
-cat "tests/outputs/build/build_tool_also_existing"
-(podman|docker) build -t "safer-build_tool_also_existing:latest" -f "build_tool_also_existing" "tests/outputs/build"
+cat "$(pwd -P)/tests/outputs/build/build_tool_also_existing"
+(podman|docker) build -t "safer-build_tool_also_existing:latest" -f "build_tool_also_existing" "$(pwd -P)/tests/outputs/build"
 EOF
 )" \
 	"share/images/build_tool_also_existing" "outputs/build/build_tool_also_existing" \
@@ -286,8 +297,8 @@ SAFER_LIB_PATH=tests/share:tests/share_alt \
 	test_runs_and_stdout_and_generates "Get the build file from an alternative location" \
 	"$(cat <<EOF
 Build script was installed. Review and build with:
-cat "tests/outputs/build/build_tool_alt"
-(podman|docker) build -t "safer-build_tool_alt:latest" -f "build_tool_alt" "tests/outputs/build"
+cat "$(pwd -P)/tests/outputs/build/build_tool_alt"
+(podman|docker) build -t "safer-build_tool_alt:latest" -f "build_tool_alt" "$(pwd -P)/tests/outputs/build"
 EOF
 )" \
 	"share_alt/images/build_tool_alt" "outputs/build/build_tool_alt" \

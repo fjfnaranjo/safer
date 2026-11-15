@@ -66,6 +66,12 @@ done
 
 shift $((OPTIND - 1))
 
+cwd=$(pwd -P)
+case "$script_dir" in
+	/*) ;;
+	*) script_dir="$cwd/$script_dir" ;;
+esac
+
 tty_mode=${tty_mode:-AUTO}
 case "$tty_mode" in
 	AUTO) guess_interactive_opts=1 ;;
@@ -220,7 +226,6 @@ fi
 # Section 6: Writing the script
 
 script_file=$(mktemp)
-cwd=$(pwd -P)
 
 if [ "${guess_interactive_opts+x}" ]; then
 	flag_spec='$interactive_flags'
