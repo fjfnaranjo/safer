@@ -59,11 +59,14 @@ system-wide.
 4. Update `share/man/safer.1`.
 5. Update `README.md` and `web/index.html` if user-facing behavior changes.
 6. Update the shell completion scripts if needed.
-7. Remove the related item from `TODO.md` if present.
 
 ## Adding Containerfiles to the library
 
-Try to strike a good balance between small image size and tool
-functionality coverage. Most of the time either "Alpine + tool" or
-"Alpine + language tool-chain + tool" should suffice. Check for existing
-Containerfiles.
+- Minimize the number of suppliers in the chain. Don't add extra tool
+  repositories if not needed. Prefer upstream sources or official base
+  images when available.
+- Use language-specific distribution tools (pip/npm) only when upstream
+  packaging is unavailable.
+- Use a rolling release strategy for base image version specifications.
+- Only then optimize for a small image size.
+- Reuse existing templates and Containerfiles before adding new ones.
