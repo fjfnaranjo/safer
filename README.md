@@ -1,8 +1,11 @@
 # safer
+
 > Protect your dev box from supply-chain attacks with **safer**.
 
 ⚠️ WIP: This project is currently under its initial development phase.
+
 ## What is safer?
+
 **safer** creates scripts to run dev tools using container runtimes.
 
 The scripts will mount the project files (and others, if needed) in the
@@ -30,8 +33,11 @@ without any option to get a new definition for the PATH environment
 variable (you can add this to your shell settings or use a tool like
 `direnv` to load it). You can also run `eval $(safer)` to make the
 scripts available immediately.
+
 ## Installing safer
+
 ### Linux
+
 Download and unpack the latest safer release:
 
 ```
@@ -58,7 +64,9 @@ sudo install -Dm644 share/man/man1/safer.1 /usr/local/share/man/man1/safer.1
 sudo install -dm755 /usr/local/share/safer/images
 sudo install -Dm644 share/safer/images/* /usr/local/share/safer/images/
 ```
+
 ### MacOS
+
 Use Homebrew:
 
 ```
