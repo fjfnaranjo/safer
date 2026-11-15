@@ -17,7 +17,7 @@ if ! docker container inspect safer-test-container-complex >/dev/null 2>&1; then
 		-v "/vol/1":"/vol/1" \
 		-v "/vol/2":"/vol/2" \
 		-d --name "safer-test-container-complex" \
-		safer-test-image-sh sleep inf
+		safer-test-image-sh complex-cmd
 fi
 docker exec -i \
 	-w "$(pwd -P)" \

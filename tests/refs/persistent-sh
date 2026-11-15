@@ -18,7 +18,7 @@ if ! docker container inspect safer-test-container-sh >/dev/null 2>&1; then
 		-v "CWD":"CWD" \
 		-w "$project_dir" \
 		-d --name "safer-test-container-sh" \
-		safer-test-image-sh sleep inf
+		safer-test-image-sh sleep inf >/dev/null 2>&1
 fi
 docker exec $interactive_flags \
 	-w "$(pwd -P)" \

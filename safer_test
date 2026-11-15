@@ -415,6 +415,7 @@ test_runs_and_generates_patch "Persistent and sh entrypoint plus most of the fla
 	-p 10443 \
 	-x /bin/other_bin \
 	-n safer-test-container-complex \
+	-K complex-cmd \
 	-t STDIN \
 	persistent-complex \
 	safer-test-image-sh \

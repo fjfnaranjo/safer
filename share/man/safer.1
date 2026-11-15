@@ -51,7 +51,7 @@ Run the tool in a persistent container.
 .BR \-K " command"
 Command used to persist the container (implies -k).
 .br
-Default: sleep inf
+Default: sleep inf >/dev/null 2>&1
 .TP
 .BR \-a " argument"
 Argument injected to stop persisting containers (implies -k).
@@ -122,7 +122,7 @@ Runtime extra args. See
 .BR SAFER_PERSIST_CMD
 Command used to persist the container.
 .br
-Default: sleep inf
+Default: sleep inf >/dev/null 2>&1
 .TP
 .BR SAFER_PERSIST_STOP_CMD
 Argument injected to stop persisting containers.

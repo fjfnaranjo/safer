@@ -18,7 +18,7 @@ if ! docker container inspect persistent-arg-safer >/dev/null 2>&1; then
 		-v "CWD":"CWD" \
 		-w "$project_dir" \
 		-d --name "persistent-arg-safer" \
-		safer-test-image-no-entrypoint sleep inf
+		safer-test-image-no-entrypoint sleep inf >/dev/null 2>&1
 fi
 docker exec $interactive_flags \
 	-w "$(pwd -P)" \
