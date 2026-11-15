@@ -24,6 +24,7 @@ _safer_list_images() {
 _arguments \
   '-x[Tool entrypoint in the image]' \
   '-p[Container port to publish (repeatable)]' \
+  '-e[Environment variable to set (repeatable)]' \
   '-k[Run the tool in a persistent container]' \
   '-n[Use this name to persist the container]' \
   '-N[Use this name + CWD to persist the container]' \

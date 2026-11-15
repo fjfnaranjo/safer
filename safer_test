@@ -246,6 +246,16 @@ test_runs_and_generates "Generation with two ports" \
 	./safer -p 10443 -p 10080:80 two_ports a_tool_image:latest
 
 # Test case
+test_runs_and_generates "Generation with environment variable" \
+	"refs/env" "outputs/env" \
+	./safer -e FOO env a_tool_image:latest
+
+# Test case
+test_runs_and_generates "Generation with two environment variables" \
+	"refs/two_envs" "outputs/two_envs" \
+	./safer -e FOO -e BAR=baz two_envs a_tool_image:latest
+
+# Test case
 test_runs_and_generates "Extra volumes" \
 	"refs/volumes" "outputs/volumes" \
 	./safer volumes a_tool_image:latest /vol/1 /vol/2

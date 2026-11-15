@@ -15,6 +15,7 @@ For the full list of Options and Environment Vars, see the man page.
 Options:
  -x cmd      Tool entrypoint in the image.
  -p p-spec   Container port to publish (repeatable).
+ -e e-spec   Environment variable to set (repeatable).
  -k          Run the tool in a persistent container.
  -n name     Use this name to persist the container (implies -k).
  -f          Force script replacement.
@@ -40,7 +41,7 @@ lib_path=${SAFER_LIB_PATH:-~/.local/share/safer:/usr/share/safer:/usr/local/shar
 persist_cmd="${SAFER_PERSIST_CMD:-sleep inf >/dev/null 2>&1}"
 persist_stop_cmd="${SAFER_PERSIST_STOP_CMD:---safer-stop}"
 
-while getopts x:p:kn:N:d:R:X:K:a:ft:i:I:vh opt
+while getopts x:p:e:kn:N:d:R:X:K:a:ft:i:I:vh opt
 do
 	case $opt in
 		x) entrypoint=$OPTARG ;;
@@ -49,6 +50,13 @@ do
 				port_map=$(printf '%s\n%s' "$port_map" "$OPTARG")
 			else
 				port_map=$OPTARG
+			fi
+			;;
+		e)
+			if [ "${env_map+x}" ]; then
+				env_map=$(printf '%s\n%s' "$env_map" "$OPTARG")
+			else
+				env_map=$OPTARG
 			fi
 			;;
 		k) persist=1 ;;
@@ -288,6 +296,13 @@ fi
 		printf '%s\n' "$port_map" |
 		while IFS= read -r a_port; do
 			printf '%b\t-p "%s" \\\n' "$pad" "$a_port"
+		done
+	fi
+
+	if [ -n "$env_map" ]; then
+		printf '%s\n' "$env_map" |
+		while IFS= read -r an_env; do
+			printf '%b\t-e "%s" \\\n' "$pad" "$an_env"
 		done
 	fi
 
