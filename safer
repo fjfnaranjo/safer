@@ -71,6 +71,16 @@ case "$script_dir" in
 	/*) ;;
 	*) script_dir="$cwd/$script_dir" ;;
 esac
+case "$script_dir" in
+	*[!a-zA-Z0-9_./-]*)
+		quoted_script_dir_inner=$(printf "%s" "$script_dir" | sed "s/'/'\\\\''/g")
+		quoted_script_dir="'$quoted_script_dir_inner'"
+		;;
+	*)
+		quoted_script_dir_inner=$script_dir
+		quoted_script_dir=$quoted_script_dir_inner
+		;;
+esac
 
 tty_mode=${tty_mode:-AUTO}
 case "$tty_mode" in
@@ -112,7 +122,7 @@ if [ "${lib_image+x}" ]; then
 	found=$(find_item_in_lib images "$lib_image")
 	if [ -n "$found" ]; then
 		if [ -e "$script_dir/build/$lib_image" ] && [ -z "$force" ]; then
-			echo "$script_dir/build/$lib_image already exists."
+			echo "'$quoted_script_dir_inner/build/$lib_image' already exists."
 			exit 1
 		else
 			mkdir -p "$script_dir/build"
@@ -140,7 +150,7 @@ if [ $# -gt 1 ]; then
 	image="$2"
 	shift 2
 elif [ $# -eq 0 ]; then
-	printf 'PATH="%s:$PATH"\n' "$script_dir"
+	printf 'export PATH=%s:$PATH\n' "$quoted_script_dir"
 	exit
 else
 	echo "$usage"

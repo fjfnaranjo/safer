@@ -2,6 +2,14 @@
 
 set -e
 
+# Preconditions
+case "$(pwd -P)" in
+	*[!a-zA-Z0-9_./-]*)
+		echo "Tests require a pwd with only alphanum chars, _, ., /, and -." >&2
+		exit 1
+		;;
+esac
+
 # Clean old test runs artifacts
 rm -rf tests/outputs
 mkdir -p tests/outputs
@@ -151,29 +159,49 @@ test_runs_and_generates_patch () {
 # Test case
 ( unset SAFER_DIR
 test_runs_and_stdout "PATH definition default" \
-	"PATH=\"$(pwd -P)/.safer:\$PATH\"" \
+	"export PATH=$(pwd -P)/.safer:\$PATH" \
 	./safer )
 
 # Test case
 test_runs_and_stdout "PATH definition with -d override" \
-	'PATH="/path/to/scripts:$PATH"' \
+	'export PATH=/path/to/scripts:$PATH' \
 	./safer -d /path/to/scripts
 
 # Test case
 test_runs_and_stdout "PATH definition with relative -d override" \
-	"PATH=\"$(pwd -P)/tests:\$PATH\"" \
+	"export PATH=$(pwd -P)/tests:\$PATH" \
 	./safer -d tests
 
 # Test case
 SAFER_DIR=/path/to/scripts/env \
 test_runs_and_stdout "PATH definition with env override" \
-	'PATH="/path/to/scripts/env:$PATH"' \
+	'export PATH=/path/to/scripts/env:$PATH' \
 	./safer
 
 # Test case
 test_runs_and_stdout "PATH definition with relative env override" \
-	"PATH=\"$(pwd -P)/tests/outputs:\$PATH\"" \
+	"export PATH=$(pwd -P)/tests/outputs:\$PATH" \
 	./safer
+
+# Test case
+test_runs_and_stdout "PATH definition with a spaces" \
+	"export PATH='$(pwd -P)/tests/my scripts':\$PATH" \
+	./safer -d "tests/my scripts"
+
+# Test case
+test_runs_and_stdout "PATH definition with a double quote" \
+	"export PATH='/path/to/scripts/with/a/quote/\"':\$PATH" \
+	./safer -d "/path/to/scripts/with/a/quote/\""
+
+# Test case
+test_runs_and_stdout "PATH definition with a single quote" \
+	"export PATH='$(pwd -P)/tests/it'\\''s scripts':\$PATH" \
+	./safer -d "tests/it's scripts"
+
+# Test case
+test_runs_and_stdout "PATH definition with a dollar sign (var)" \
+	"export PATH='$(pwd -P)/tests/\$NOT_A_VAR':\$PATH" \
+	./safer -d 'tests/$NOT_A_VAR'
 
 # Test case
 test_fails_and_streams "Illegal option" \
@@ -277,7 +305,7 @@ test_fails_and_stdout "Missing library image" \
 # Test case
 touch tests/outputs/build/build_tool_existing
 test_fails_and_stdout "Don't replace build file from library" \
-	"$(pwd -P)/tests/outputs/build/build_tool_existing already exists." \
+	"'$(pwd -P)/tests/outputs/build/build_tool_existing' already exists." \
 	./safer -i build_tool_existing
 
 # Test case
